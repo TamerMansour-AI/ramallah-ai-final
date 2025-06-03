@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Ramallah.ai</title>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.querySelector("#login-form");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = form.email.value;
+        const { error } = await supabase.auth.signInWithOtp({ email });
+        if (error) {
+          alert("❌ Error: " + error.message);
+        } else {
+          alert("📧 Check your email for the login link.");
+        }
+      });
+    });
+  </script>
+</head>
+<body style="padding:2rem;font-family:sans-serif;">
+  <h2>🔐 Admin Login</h2>
+  <form id="login-form">
+    <input type="email" name="email" placeholder="Email" required style="padding:0.5rem;width:300px;" />
+    <br><br>
+    <button type="submit">Login with Magic Link</button>
+  </form>
+</body>
+</html>

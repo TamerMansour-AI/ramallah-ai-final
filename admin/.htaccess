@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Restricted Area"
+AuthUserFile /home/u465341937/domains/ramallah.ai/public_html/admin/.htpasswd
+Require valid-user

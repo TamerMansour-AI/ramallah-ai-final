@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Creator – Ramallah.ai</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/gallery.css" />
+
+  <script src="js/env.js"></script>
+  <script src="js/config.js"></script>
+
+  <!-- ✅ Meta Tags Injection Script -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('id');
+
+    const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+
+    if (slug) {
+      (async () => {
+        const { data, error } = await supabase
+          .from('creators')
+          .select('*')
+          .eq('slug', slug)
+          .single();
+
+        if (!error && data) {
+          const title = `${data.name} – Ramallah.ai`;
+          const description = data.bio_en || data.speciality || 'Palestinian AI Creator';
+          const image = data.avatar_url || 'https://ramallah.ai/images/creators/avatar.png';
+          const url = window.location.href;
+
+          const tags = [
+            ['og:title', title],
+            ['og:description', description],
+            ['og:image', image],
+            ['og:url', url],
+            ['twitter:card', 'summary_large_image'],
+            ['twitter:title', title],
+            ['twitter:description', description],
+            ['twitter:image', image],
+            ['canonical', url]
+          ];
+
+          tags.forEach(([name, content]) => {
+            const tag = document.createElement(name === 'canonical' ? 'link' : 'meta');
+            if (name === 'canonical') {
+              tag.rel = 'canonical';
+              tag.href = content;
+            } else {
+              tag.setAttribute(name.startsWith('og:') || name.startsWith('twitter:') ? 'property' : 'name', name);
+              tag.content = content;
+            }
+            document.head.appendChild(tag);
+          });
+        }
+      })();
+    }
+  </script>
+
+  <style>
+    .like-box {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="main-header">
+  <a href="index.html" class="logo">Ramallah.ai</a>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="blog.html">Blog</a>
+    <a href="creator-profiles.html">Creators</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<main class="container">
+  <section id="creator-profile">
+    <p>Loading...</p>
+  </section>
+</main>
+
+<footer class="footer">
+  <small>© 2025 Ramallah.ai</small>
+</footer>
+
+<!-- ✅ Creator Content Renderer + Like Logic -->
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('id');
+
+  const container = document.getElementById('creator-profile');
+  const isArabic = document.documentElement.lang === 'ar';
+  const bioField = isArabic ? 'bio_ar' : 'bio_en';
+
+  if (!slug) {
+  container.innerHTML = '<p>Creator not found.</p>';
+} else {
+  (async () => {
+    const { data, error } = await supabase
+      .from('creators')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+
+    if (error || !data) {
+      container.innerHTML = '<p>❌ Failed to load creator info.</p>';
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="creator-details">
+        <img class="creator-photo" src="${data.avatar_url || 'images/creators/avatar.png'}"
+             alt="${data.name}" onerror="this.src='images/creators/avatar.png';">
+        <h1>${data.name}</h1>
+        ${data.speciality ? `<h3>${data.speciality}</h3>` : ''}
+        <p>${data[bioField] || ''}</p>
+
+        <div class="like-box">
+          <button id="like-btn" class="cta-btn">👍 Like</button>
+          <span id="like-count">...</span>
+        </div>
+
+        <div class="share-box">
+          <button id="share-btn" class="cta-btn">🔗 Share</button>
+          <span id="share-status" style="font-size:0.9rem;color:gray;"></span>
+        </div>
+
+        <br>
+        <a href="creator-profiles${isArabic ? '-ar' : ''}.html" class="cta-btn">← Back to all creators</a>
+      </div>
+    `;
+
+    // Like logic
+    const likeCountEl = document.getElementById('like-count');
+    const likeBtn = document.getElementById('like-btn');
+
+    const { data: likeData } = await supabase
+      .from('likes')
+      .select('count')
+      .eq('slug', slug)
+      .single();
+
+    let currentCount = likeData?.count || 0;
+    likeCountEl.textContent = `${currentCount} likes`;
+
+    const likedKey = `liked_${slug}`;
+    if (localStorage.getItem(likedKey)) {
+      likeBtn.disabled = true;
+      likeBtn.textContent = '❤️ Liked';
+    }
+
+    likeBtn.addEventListener('click', async () => {
+      if (localStorage.getItem(likedKey)) return;
+
+      const { error: updateError } = await supabase
+        .from('likes')
+        .update({ count: currentCount + 1 })
+        .eq('slug', slug);
+
+      if (!updateError) {
+        currentCount++;
+        likeCountEl.textContent = `${currentCount} likes`;
+        likeBtn.disabled = true;
+        likeBtn.textContent = '❤️ Liked';
+        localStorage.setItem(likedKey, '1');
+      } else {
+        alert('Something went wrong.');
+      }
+    });
+
+    // Share logic
+    const shareBtn = document.getElementById('share-btn');
+    const shareStatus = document.getElementById('share-status');
+    const shareTitle = `${data.name} – Ramallah.ai`;
+    const shareText = isArabic
+      ? `تعرّف على ${data.name} ضمن منصة Ramallah.ai`
+      : `Meet ${data.name} on Ramallah.ai`;
+    const shareUrl = window.location.href;
+
+    shareBtn.addEventListener('click', async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: shareTitle,
+            text: shareText,
+            url: shareUrl
+          });
+          shareStatus.textContent = isArabic ? '✅ تم المشاركة' : '✅ Shared!';
+        } catch (err) {
+          shareStatus.textContent = isArabic ? '❌ فشل المشاركة' : '❌ Share canceled';
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          shareStatus.textContent = isArabic
+            ? '📋 تم نسخ الرابط'
+            : '📋 Link copied to clipboard!';
+        } catch {
+          shareStatus.textContent = isArabic
+            ? '❌ لم يتم نسخ الرابط'
+            : '❌ Failed to copy link.';
+        }
+      }
+    });
+  })();
+}
+</script>
+
+</body>
+</html>

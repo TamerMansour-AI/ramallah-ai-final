@@ -1,0 +1,114 @@
+/* =========  Ramallah.ai v1.5  ========= */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap');
+
+:root{
+  --background:#f6f3ec;
+  --olive:#b7b48a; --accent:#3b7d4a; --accent-dark:#296338;
+  --text:#232323; --radius:18px; --shadow:0 4px 24px rgba(60,80,60,.07);
+  --transition:.4s cubic-bezier(.77,0,.18,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Cairo',sans-serif;background:var(--background);color:var(--text);line-height:1.6}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+.container{width:min(1100px,90%);margin-inline:auto}
+
+/* NAVBAR */
+.navbar{position:sticky;top:0;z-index:999;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.navbar-container{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem}
+.logo{font-weight:700;font-size:1.2rem}
+.navbar-links{display:flex;gap:1rem}
+.navbar-links a[aria-current]{font-weight:700;color:var(--accent-dark)}
+/* mobile */
+.navbar-hamburger{display:none;flex-direction:column;gap:4px;background:none;border:0;cursor:pointer}
+.navbar-hamburger span{width:22px;height:2px;background:var(--text);transition:transform .3s}
+@media(max-width:720px){
+  .navbar-hamburger{display:flex}
+  .navbar-links{position:fixed;inset:0 0 auto auto;background:#fff;padding:2rem;flex-direction:column;
+                transform:translateX(100%);transition:var(--transition)}
+  .navbar-links.open{transform:translateX(0)}
+}
+
+/* HERO */
+.hero{padding:4.5rem 1rem;text-align:center}
+.hero h1{font-size:clamp(2rem,5vw,3rem);margin-bottom:1rem}
+.cta-btn{display:inline-block;margin-top:1.2rem;padding:.9rem 1.8rem;background:var(--accent);
+         color:#fff;border-radius:var(--radius);transition:var(--transition)} .cta-btn:hover{background:var(--accent-dark)}
+
+/* GALLERY cards */
+.gallery-grid{display:grid;gap:1.4rem;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.gallery-card{background:#fff;border-radius:var(--radius);padding:1rem;box-shadow:var(--shadow);opacity:0;transform:translateY(20px);transition:var(--transition)}
+.gallery-card.show{opacity:1;transform:none}
+.gallery-icon{font-size:2rem;margin-bottom:.6rem}
+
+/* FOOTER */
+.footer{margin-top:4rem;padding:2rem 0;text-align:center;color:#666;font-size:.9rem}
+
+.contact-box {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.contact-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.contact-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 0.6rem;
+  border-radius: var(--radius);
+  border: 1px solid #ccc;
+  font-family: inherit;
+}
+
+.contact-form button {
+  align-self: start;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.contact-info {
+  flex: 1;
+  font-size: 0.95rem;
+}
+
+.contact-info img {
+  margin-top: 1rem;
+  max-width: 160px;
+}
+
+html[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+html[dir="rtl"] .creator-details {
+  text-align: right;
+}
+
+html[dir="rtl"] .like-box {
+  flex-direction: row-reverse;
+}
+
+.like-box, .share-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
