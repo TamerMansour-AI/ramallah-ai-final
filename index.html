@@ -84,16 +84,19 @@
           <option>Blog</option>
           <option>Article</option>
           <option>Book</option>
+          <option>Podcast</option>
         </select>
       </label>
       <label>
         Upload file (image/video/audio):
         <input type="file" name="workFile" accept="image/*,video/*,audio/*">
-      </label>      
-      <label>Description <textarea name="description" rows="3" required></textarea></label>
+      </label>
+      <label>Description
+        <textarea name="description" rows="3" maxlength="500" required></textarea>
+        <div class="char-count">0/500</div>
+      </label>
       <button class="cta-btn">Send</button>
     </form>
-    <p class="form-note">Demo‑only — no files stored.</p>
     <div id="thank-you-modal" class="thank-you-modal">
       <div class="modal-content">
         <span id="close-modal-btn" class="modal-close">&times;</span>
