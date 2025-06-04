@@ -18,21 +18,47 @@ async function loadCreators() {
   }
 
   if (!data.length) {
-    grid.innerHTML = isArabic
-      ? '<p>لا يوجد مبدعون بعد.</p>'
-      : '<p>No creators yet.</p>'
+    const p = document.createElement('p')
+    p.textContent = isArabic ? 'لا يوجد مبدعون بعد.' : 'No creators yet.'
+    grid.innerHTML = ''
+    grid.appendChild(p)
     return
   }
 
-  grid.innerHTML = data.map(row => `
-    <a class="creator-card" href="creator${isArabic ? '-ar' : ''}.html?id=${encodeURIComponent(row.slug)}">
-      <img class="creator-photo" src="${row.avatar_url || 'images/creators/avatar.png'}"
-           onerror="this.src='images/creators/avatar.png';" alt="${row.name}">
-      <h3 class="creator-name">${row.name}</h3>
-      <p class="creator-desc">${row[bioField] ?? ''}</p>
-      ${row.speciality ? `<span class="creator-type">${row.speciality}</span>` : ''}
-    </a>
-  `).join('')
+  grid.innerHTML = ''
+  data.forEach(row => {
+    const link = document.createElement('a')
+    link.className = 'creator-card'
+    link.href = `creator${isArabic ? '-ar' : ''}.html?id=${encodeURIComponent(row.slug)}`
+
+    const img = document.createElement('img')
+    img.className = 'creator-photo'
+    img.src = row.avatar_url || 'images/creators/avatar.png'
+    img.alt = row.name
+    img.onerror = function () {
+      this.src = 'images/creators/avatar.png'
+    }
+    link.appendChild(img)
+
+    const h3 = document.createElement('h3')
+    h3.className = 'creator-name'
+    h3.textContent = row.name
+    link.appendChild(h3)
+
+    const pDesc = document.createElement('p')
+    pDesc.className = 'creator-desc'
+    pDesc.textContent = row[bioField] ?? ''
+    link.appendChild(pDesc)
+
+    if (row.speciality) {
+      const span = document.createElement('span')
+      span.className = 'creator-type'
+      span.textContent = row.speciality
+      link.appendChild(span)
+    }
+
+    grid.appendChild(link)
+  })
 }
 
 document.addEventListener('DOMContentLoaded', loadCreators)
