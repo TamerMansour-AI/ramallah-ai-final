@@ -120,13 +120,22 @@
       return;
     }
 
+    const socials = [];
+    if (data.instagram) socials.push(`<a href="${data.instagram}" target="_blank" aria-label="Instagram">📷</a>`);
+    if (data.twitter) socials.push(`<a href="${data.twitter}" target="_blank" aria-label="Twitter">🐦</a>`);
+    if (data.youtube) socials.push(`<a href="${data.youtube}" target="_blank" aria-label="YouTube">▶️</a>`);
+    const socialsHtml = socials.length ? `<div class="creator-socials">${socials.join('')}</div>` : '';
+
+    const bioText = data[bioField] || (isArabic ? 'لا تتوفر نبذة.' : 'No bio available.');
+
     container.innerHTML = `
       <div class="creator-details">
         <img class="creator-photo" src="${data.avatar_url || 'images/creators/avatar.png'}"
              alt="${data.name}" onerror="this.src='images/creators/avatar.png';">
         <h1>${data.name}</h1>
         ${data.speciality ? `<h3>${data.speciality}</h3>` : ''}
-        <p>${data[bioField] || ''}</p>
+        <p>${bioText}</p>
+        ${socialsHtml}
 
         <div class="like-box">
           <button id="like-btn" class="cta-btn">👍 Like</button>
@@ -191,28 +200,16 @@
     const shareUrl = window.location.href;
 
     shareBtn.addEventListener('click', async () => {
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: shareTitle,
-            text: shareText,
-            url: shareUrl
-          });
-          shareStatus.textContent = isArabic ? '✅ تم المشاركة' : '✅ Shared!';
-        } catch (err) {
-          shareStatus.textContent = isArabic ? '❌ فشل المشاركة' : '❌ Share canceled';
-        }
-      } else {
-        try {
-          await navigator.clipboard.writeText(shareUrl);
-          shareStatus.textContent = isArabic
-            ? '📋 تم نسخ الرابط'
-            : '📋 Link copied to clipboard!';
-        } catch {
-          shareStatus.textContent = isArabic
-            ? '❌ لم يتم نسخ الرابط'
-            : '❌ Failed to copy link.';
-        }
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        shareStatus.textContent = isArabic
+          ? '📋 تم نسخ الرابط'
+          : '📋 Link copied!';
+        setTimeout(() => (shareStatus.textContent = ''), 2000);
+      } catch {
+        shareStatus.textContent = isArabic
+          ? '❌ لم يتم نسخ الرابط'
+          : '❌ Failed to copy link.';
       }
     });
   })();

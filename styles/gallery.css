@@ -167,4 +167,22 @@
   box-shadow: 0 0 15px var(--accent);
 }
 
+#load-more-btn {
+  display: block;
+  margin: 2rem auto;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+#load-more-btn:hover {background: var(--accent-dark);}
+
+.shuffle-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 
