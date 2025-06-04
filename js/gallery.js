@@ -73,16 +73,54 @@ function renderFiltered() {
 
       const card = document.createElement('div');
       card.className = 'gallery-card show';
-      card.innerHTML = `
-        ${imgSrc ? `<img src="${imgSrc}" alt="${item.title_en || ''}" loading="lazy" class="clickable-image">` : ''}
-        ${(item.creator_name || item.creator)
-            ? `<div class="gallery-meta">By <b>${item.creator_name || item.creator}</b></div>`
-            : ''}
-        ${item.title ? `<div class="gallery-title">${item.title}</div>` : ''}
-        ${item.type ? `<div class="gallery-badge">${item.type}</div>` : ''}
-        <div class="gallery-desc">${item.desc_en || item.desc_ar || ''}</div>
-        ${item.link && item.type !== 'image' ? `<a href="${item.link}" target="_blank">🔗 View Work</a>` : ''}
-      `;
+
+      if (imgSrc) {
+        const img = document.createElement('img');
+        img.src = imgSrc;
+        img.alt = item.title_en || '';
+        img.loading = 'lazy';
+        img.className = 'clickable-image';
+        card.appendChild(img);
+      }
+
+      const creatorName = item.creator_name || item.creator;
+      if (creatorName) {
+        const metaDiv = document.createElement('div');
+        metaDiv.className = 'gallery-meta';
+        metaDiv.textContent = 'By ';
+        const b = document.createElement('b');
+        b.textContent = creatorName;
+        metaDiv.appendChild(b);
+        card.appendChild(metaDiv);
+      }
+
+      if (item.title) {
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'gallery-title';
+        titleDiv.textContent = item.title;
+        card.appendChild(titleDiv);
+      }
+
+      if (item.type) {
+        const badge = document.createElement('div');
+        badge.className = 'gallery-badge';
+        badge.textContent = item.type;
+        card.appendChild(badge);
+      }
+
+      const descDiv = document.createElement('div');
+      descDiv.className = 'gallery-desc';
+      descDiv.textContent = item.desc_en || item.desc_ar || '';
+      card.appendChild(descDiv);
+
+      if (item.link && item.type !== 'image') {
+        const link = document.createElement('a');
+        link.href = item.link;
+        link.target = '_blank';
+        link.textContent = '🔗 View Work';
+        card.appendChild(link);
+      }
+
       container.appendChild(card);
     });
   });
@@ -102,7 +140,9 @@ document.addEventListener('click', function (e) {
   if (e.target.classList.contains('clickable-image')) {
     const overlay = document.createElement('div');
     overlay.className = 'lightbox-overlay';
-    overlay.innerHTML = `<img src="${e.target.src}" alt="">`;
+    const img = document.createElement('img');
+    img.src = e.target.src;
+    overlay.appendChild(img);
     document.body.appendChild(overlay);
 
     overlay.addEventListener('click', () => overlay.remove());
