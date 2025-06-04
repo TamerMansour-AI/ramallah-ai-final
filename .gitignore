@@ -1,0 +1,3 @@
+# Ignore runtime env files containing secrets
+.env
+js/env.js
