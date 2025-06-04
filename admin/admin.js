@@ -18,11 +18,10 @@ document.getElementById('login-btn').addEventListener('click', () => {
   }
 });
 
-async function fetchPending() {
-  const { data, error } = await supabase
-    .from('submissions')
-    .select('*')
-    .eq('approved', false);
+const { data, error } = await supabase
+  .from('submissions')
+  .select('*')
+  .eq('status', 'pending')
 
   if (error) {
     alert('❌ Failed to load submissions');
