@@ -19,8 +19,26 @@ const sectionMap = {
 };
 
 let allItems = [];
+let creatorsMap = {};
+const batchSize = 12;
+let itemsShown = batchSize;
+let shuffleEnabled = false;
+const params = new URLSearchParams(window.location.search);
+const creatorParam = (params.get('creator') || '').toLowerCase();
+const isArabic = document.documentElement.lang === 'ar';
+
+async function fetchCreators() {
+  const { data, error } = await supabase.from('creators').select('name,slug');
+  if (!error && data) {
+    creatorsMap = {};
+    data.forEach((c) => {
+      creatorsMap[c.name.toLowerCase()] = c.slug;
+    });
+  }
+}
 
 async function fetchData() {
+  await fetchCreators();
   const { data, error } = await supabase
     .from('submissions')
     .select('*')
@@ -40,114 +58,136 @@ async function fetchData() {
     return hasTitle && hasImage;
   });
 
-  renderFiltered();
+  renderFiltered(true);
 }
 
-function renderFiltered() {
+function renderFiltered(reset = false) {
+  if (reset) itemsShown = batchSize;
+
   const searchValue =
     document.getElementById('search-input')?.value?.toLowerCase() || '';
-
   const selectedTypeRaw = document.getElementById('type-filter')?.value || '';
   const selectedType =
     selectedTypeRaw === 'images' ? 'image' : selectedTypeRaw;
 
-  let anyData = false;
+  let filtered = allItems.filter((item) => {
+    const matchesType = selectedType ? item.type === selectedType : true;
+    const matchesSearch =
+      (item.title_en || item.title_ar || '')
+        .toLowerCase()
+        .includes(searchValue) ||
+      (item.creator_name || '')
+        .toLowerCase()
+        .includes(searchValue);
+    const matchesCreatorParam = creatorParam
+      ? (item.creator_name || '').toLowerCase() === creatorParam
+      : true;
+    return matchesType && matchesSearch && matchesCreatorParam;
+  });
 
-  sections.forEach((section) => {
+  if (shuffleEnabled) {
+    filtered = filtered.sort(() => Math.random() - 0.5);
+  }
+
+  const pageItems = filtered.slice(0, itemsShown);
+
+  const hasData = {};
+  sections.forEach((s) => {
+    hasData[s] = false;
+    const cont = document.querySelector(`#${s} .gallery-grid`);
+    if (cont) cont.innerHTML = '';
+  });
+
+  pageItems.forEach((item) => {
+    const section = Object.keys(sectionMap).find((k) => sectionMap[k] === item.type);
     const container = document.querySelector(`#${section} .gallery-grid`);
     if (!container) return;
-    container.innerHTML = '';
-    const sectionEl = document.getElementById(section);
+    hasData[section] = true;
 
-    const filtered = allItems.filter((item) => {
-      const matchesType = selectedType ? item.type === selectedType : true;
-      const matchesSearch =
-        (item.title_en || item.title_ar || '')
-          .toLowerCase()
-          .includes(searchValue) ||
-        (item.creator_name || '')
-          .toLowerCase()
-          .includes(searchValue);
+    const imgSrc = item.type === 'image' ? item.link : item.thumb || '';
+    const card = document.createElement('div');
+    card.className = 'gallery-card show';
 
-      const sectionMatch = item.type === sectionMap[section];
-      return sectionMatch && matchesType && matchesSearch;
-    });
-
-    if (filtered.length === 0) {
-      if (sectionEl) sectionEl.style.display = 'none';
-    } else {
-      if (sectionEl) sectionEl.style.display = '';
-      anyData = true;
+    if (imgSrc) {
+      const img = document.createElement('img');
+      img.src = imgSrc;
+      img.alt = item.title_en || '';
+      img.loading = 'lazy';
+      img.className = 'clickable-image';
+      card.appendChild(img);
     }
 
-    filtered.forEach((item) => {
-      const imgSrc = item.type === 'image' ? item.link : item.thumb || '';
-
-      const card = document.createElement('div');
-      card.className = 'gallery-card show';
-
-      if (imgSrc) {
-        const img = document.createElement('img');
-        img.src = imgSrc;
-        img.alt = item.title_en || '';
-        img.loading = 'lazy';
-        img.className = 'clickable-image';
-        card.appendChild(img);
+    const creatorName = item.creator_name || item.creator;
+    if (creatorName) {
+      const metaDiv = document.createElement('div');
+      metaDiv.className = 'gallery-meta';
+      metaDiv.textContent = isArabic ? 'بواسطة ' : 'By ';
+      const b = document.createElement('b');
+      const slug = creatorsMap[creatorName.toLowerCase()];
+      const a = document.createElement('a');
+      a.textContent = creatorName;
+      if (slug) {
+        a.href = `creator${isArabic ? '-ar' : ''}.html?id=${encodeURIComponent(slug)}`;
+      } else {
+        a.href = `gallery${isArabic ? '-ar' : ''}.html?creator=${encodeURIComponent(creatorName)}`;
       }
+      b.appendChild(a);
+      metaDiv.appendChild(b);
+      card.appendChild(metaDiv);
+    }
 
-      const creatorName = item.creator_name || item.creator;
-      if (creatorName) {
-        const metaDiv = document.createElement('div');
-        metaDiv.className = 'gallery-meta';
-        metaDiv.textContent = 'By ';
-        const b = document.createElement('b');
-        b.textContent = creatorName;
-        metaDiv.appendChild(b);
-        card.appendChild(metaDiv);
-      }
+    if (item.title) {
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'gallery-title';
+      titleDiv.textContent = item.title;
+      card.appendChild(titleDiv);
+    }
 
-      if (item.title) {
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'gallery-title';
-        titleDiv.textContent = item.title;
-        card.appendChild(titleDiv);
-      }
+    if (item.type) {
+      const badge = document.createElement('div');
+      badge.className = 'gallery-badge';
+      badge.textContent = item.type;
+      card.appendChild(badge);
+    }
 
-      if (item.type) {
-        const badge = document.createElement('div');
-        badge.className = 'gallery-badge';
-        badge.textContent = item.type;
-        card.appendChild(badge);
-      }
+    const descDiv = document.createElement('div');
+    descDiv.className = 'gallery-desc';
+    descDiv.textContent = item.desc_en || item.desc_ar || '';
+    card.appendChild(descDiv);
 
-      const descDiv = document.createElement('div');
-      descDiv.className = 'gallery-desc';
-      descDiv.textContent = item.desc_en || item.desc_ar || '';
-      card.appendChild(descDiv);
+    if (item.link && item.type !== 'image') {
+      const link = document.createElement('a');
+      link.href = item.link;
+      link.target = '_blank';
+      link.textContent = '🔗 View Work';
+      card.appendChild(link);
+    }
 
-      if (item.link && item.type !== 'image') {
-        const link = document.createElement('a');
-        link.href = item.link;
-        link.target = '_blank';
-        link.textContent = '🔗 View Work';
-        card.appendChild(link);
-      }
+    container.appendChild(card);
+  });
 
-      container.appendChild(card);
-    });
+  sections.forEach((s) => {
+    const el = document.getElementById(s);
+    if (el) el.style.display = hasData[s] ? '' : 'none';
   });
 
   const msg = document.getElementById('gallery-empty');
-  if (!anyData) {
+  if (filtered.length === 0) {
     if (!msg) {
       const p = document.createElement('p');
       p.id = 'gallery-empty';
       p.className = 'gallery-empty';
-      p.textContent = 'No approved content yet';
+      p.textContent = isArabic ? 'لا يوجد محتوى بعد' : 'No approved content yet';
       document.querySelector('.gallery-intro .container')?.appendChild(p);
     }
   } else if (msg) {
     msg.remove();
+  }
+
+  const loadBtn = document.getElementById('load-more-btn');
+  if (loadBtn) {
+    if (itemsShown >= filtered.length) loadBtn.style.display = 'none';
+    else loadBtn.style.display = 'block';
   }
 }
 
@@ -157,8 +197,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const search = document.getElementById('search-input');
   const filter = document.getElementById('type-filter');
 
-  if (search) search.addEventListener('input', renderFiltered);
-  if (filter) filter.addEventListener('change', renderFiltered);
+  const shuffleToggle = document.getElementById('shuffle-toggle');
+  const loadMoreBtn = document.getElementById('load-more-btn');
+
+  if (search) search.addEventListener('input', () => renderFiltered(true));
+  if (filter) filter.addEventListener('change', () => renderFiltered(true));
+  if (shuffleToggle)
+    shuffleToggle.addEventListener('change', () => {
+      shuffleEnabled = shuffleToggle.checked;
+      renderFiltered(true);
+    });
+  if (loadMoreBtn)
+    loadMoreBtn.addEventListener('click', () => {
+      itemsShown += batchSize;
+      renderFiltered();
+    });
 });
 
 document.addEventListener('click', function (e) {

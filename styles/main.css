@@ -243,3 +243,18 @@ html[dir="rtl"] .like-box {
  50%{background-position:100% 50%}
  100%{background-position:0 50%}
 }
+
+.creator-photo{
+  max-width:200px;
+  border-radius:var(--radius);
+}
+
+.creator-socials{margin-top:1rem;}
+.creator-socials a{
+  margin-right:0.5rem;
+  font-size:1.6rem;
+}
+html[dir="rtl"] .creator-socials a{
+  margin-left:0.5rem;
+  margin-right:0;
+}
