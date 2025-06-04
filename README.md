@@ -49,3 +49,7 @@ GitHub Pages, etc.). Ensure that `js/env.js` is generated with your Supabase
 credentials during the deployment process so forms and the admin interface can
 connect to your database.
 
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
