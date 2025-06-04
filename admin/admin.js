@@ -12,19 +12,21 @@ document.getElementById('login-btn').addEventListener('click', () => {
   if (val === PASSWORD) {
     loginBox.style.display = 'none';
     approvalPanel.style.display = 'block';
-    fetchPending();
+    fetchPending(); // ✅ this is now called correctly after login
   } else {
     alert('Incorrect password');
   }
 });
 
-const { data, error } = await supabase
-  .from('submissions')
-  .select('*')
-  .eq('status', 'pending')
+async function fetchPending() {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('*')
+    .eq('status', 'pending'); // ✅ using the correct field
 
   if (error) {
     alert('❌ Failed to load submissions');
+    console.error(error);
     return;
   }
 
@@ -67,6 +69,7 @@ const { data, error } = await supabase
     btn.textContent = 'Approve ✅';
     btn.className = 'approve-btn';
     tdAction.appendChild(btn);
+
     const feedback = document.createElement('div');
     feedback.className = 'feedback';
     tdAction.appendChild(feedback);
@@ -80,13 +83,15 @@ tableBody.addEventListener('click', async (e) => {
   if (e.target.matches('button.approve-btn')) {
     const id = e.target.dataset.id;
     const feedback = e.target.nextElementSibling;
+
     const { error } = await supabase
       .from('submissions')
-      .update({ approved: true })
+      .update({ status: 'approved' }) // ✅ match schema exactly
       .eq('id', id);
 
     if (error) {
       feedback.textContent = 'Error!';
+      console.error(error);
     } else {
       feedback.textContent = 'Approved!';
       setTimeout(() => e.target.closest('tr').remove(), 500);
