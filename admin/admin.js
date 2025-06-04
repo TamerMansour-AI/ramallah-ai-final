@@ -12,7 +12,7 @@ document.getElementById('login-btn').addEventListener('click', () => {
   if (val === PASSWORD) {
     loginBox.style.display = 'none';
     approvalPanel.style.display = 'block';
-    fetchPending(); // ✅ this is now called correctly after login
+    fetchPending(); // ✅ now this runs if password is correct
   } else {
     alert('Incorrect password');
   }
@@ -22,7 +22,7 @@ async function fetchPending() {
   const { data, error } = await supabase
     .from('submissions')
     .select('*')
-    .eq('status', 'pending'); // ✅ using the correct field
+    .eq('status', 'pending');
 
   if (error) {
     alert('❌ Failed to load submissions');
@@ -73,8 +73,8 @@ async function fetchPending() {
     const feedback = document.createElement('div');
     feedback.className = 'feedback';
     tdAction.appendChild(feedback);
-    tr.appendChild(tdAction);
 
+    tr.appendChild(tdAction);
     tableBody.appendChild(tr);
   });
 }
@@ -86,7 +86,7 @@ tableBody.addEventListener('click', async (e) => {
 
     const { error } = await supabase
       .from('submissions')
-      .update({ status: 'approved' }) // ✅ match schema exactly
+      .update({ status: 'approved' })
       .eq('id', id);
 
     if (error) {
