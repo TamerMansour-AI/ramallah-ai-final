@@ -258,3 +258,13 @@ html[dir="rtl"] .creator-socials a{
   margin-left:0.5rem;
   margin-right:0;
 }
+/* BLOG COMPONENTS */
+.tag-filter{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.tag-filter button{padding:.3rem .8rem;border-radius:var(--radius);border:1px solid #555;background:none;color:var(--text);cursor:pointer}
+.tag-filter button.active,.tag-filter button:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.comment-box{margin-top:1rem}
+.comment-box form{display:flex;flex-direction:column;gap:.5rem;margin-top:.5rem}
+.comment-box input,.comment-box textarea{padding:.5rem;border-radius:var(--radius);border:1px solid #444;font-family:inherit}
+.comment-box button{align-self:flex-start;background:var(--accent);color:#fff;border:none;padding:.4rem .9rem;border-radius:var(--radius);cursor:pointer}
+.comment-box ul{list-style:none;padding-left:0;margin-top:.5rem}
+.comment-box li{margin-bottom:.5rem}
