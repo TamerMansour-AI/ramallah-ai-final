@@ -150,3 +150,45 @@ html[dir="rtl"] .like-box {
   from {opacity:0;transform:translateY(30px);}
   to {opacity:1;transform:none;}
 }
+
+#login-box {
+  display: flex;
+  gap: 0.5rem;
+}
+
+#login-box input {
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  border: 1px solid #444;
+}
+
+#login-box button,
+.approve-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+#login-box button:hover,
+.approve-btn:hover {
+  background: var(--accent-dark);
+}
+
+#submissions-table {
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+#submissions-table th,
+#submissions-table td {
+  padding: 0.6rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.feedback {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+}
