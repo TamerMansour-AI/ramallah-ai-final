@@ -9,7 +9,7 @@ server‑side component—just upload the files to any static hosting service.
 The site highlights Palestinian creators using AI tools. Key sections include:
 
 - **`index.html`** – landing page with a submission form.
-- **`gallery.html`** – dynamic gallery of approved works.
+- **`gallery.html`** – . dynamic gallery of approved works.
 - **`creator-profiles.html`** – list of creators.
 - **`blog.html`** and **`about.html`** – informational pages.
 - **`contact.html`** – contact form backed by Supabase.
