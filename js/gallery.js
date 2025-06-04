@@ -31,6 +31,8 @@ async function fetchData() {
     return;
   }
 
+  console.log('✅ Fetched data from Supabase', data);
+
   // 🧹 تنظيف البيانات: فقط اللي عنده عنوان وصورة (أو thumb)
   allItems = data.filter(item => {
     const hasTitle = item.title || item.title_en || item.title_ar;
@@ -49,10 +51,13 @@ function renderFiltered() {
   const selectedType =
     selectedTypeRaw === 'images' ? 'image' : selectedTypeRaw;
 
+  let anyData = false;
+
   sections.forEach((section) => {
     const container = document.querySelector(`#${section} .gallery-grid`);
     if (!container) return;
     container.innerHTML = '';
+    const sectionEl = document.getElementById(section);
 
     const filtered = allItems.filter((item) => {
       const matchesType = selectedType ? item.type === selectedType : true;
@@ -67,6 +72,13 @@ function renderFiltered() {
       const sectionMatch = item.type === sectionMap[section];
       return sectionMatch && matchesType && matchesSearch;
     });
+
+    if (filtered.length === 0) {
+      if (sectionEl) sectionEl.style.display = 'none';
+    } else {
+      if (sectionEl) sectionEl.style.display = '';
+      anyData = true;
+    }
 
     filtered.forEach((item) => {
       const imgSrc = item.type === 'image' ? item.link : item.thumb || '';
@@ -124,6 +136,19 @@ function renderFiltered() {
       container.appendChild(card);
     });
   });
+
+  const msg = document.getElementById('gallery-empty');
+  if (!anyData) {
+    if (!msg) {
+      const p = document.createElement('p');
+      p.id = 'gallery-empty';
+      p.className = 'gallery-empty';
+      p.textContent = 'No approved content yet';
+      document.querySelector('.gallery-intro .container')?.appendChild(p);
+    }
+  } else if (msg) {
+    msg.remove();
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
