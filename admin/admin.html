@@ -54,14 +54,38 @@
       tableBody.innerHTML = '';
       data.forEach(row => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${row.creator_name || '-'}</td>
-          <td>${row.type}</td>
-          <td>${row.title_en || row.title_ar || '-'}</td>
-          <td><a href="${row.link}" target="_blank">🔗 View</a></td>
-          <td>${row.desc_en || row.desc_ar || '-'}</td>
-          <td><button data-id="${row.id}">Approve ✅</button></td>
-        `;
+
+        const tdCreator = document.createElement('td');
+        tdCreator.textContent = row.creator_name || '-';
+        tr.appendChild(tdCreator);
+
+        const tdType = document.createElement('td');
+        tdType.textContent = row.type;
+        tr.appendChild(tdType);
+
+        const tdTitle = document.createElement('td');
+        tdTitle.textContent = row.title_en || row.title_ar || '-';
+        tr.appendChild(tdTitle);
+
+        const tdLink = document.createElement('td');
+        const link = document.createElement('a');
+        link.href = row.link;
+        link.target = '_blank';
+        link.textContent = '🔗 View';
+        tdLink.appendChild(link);
+        tr.appendChild(tdLink);
+
+        const tdDesc = document.createElement('td');
+        tdDesc.textContent = row.desc_en || row.desc_ar || '-';
+        tr.appendChild(tdDesc);
+
+        const tdAction = document.createElement('td');
+        const btn = document.createElement('button');
+        btn.dataset.id = row.id;
+        btn.textContent = 'Approve ✅';
+        tdAction.appendChild(btn);
+        tr.appendChild(tdAction);
+
         tableBody.appendChild(tr);
       });
     }
