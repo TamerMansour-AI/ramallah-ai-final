@@ -1,43 +1,69 @@
-document.addEventListener('DOMContentLoaded', ()=> {
-  // تفعيل قائمة الهاتف
+document.addEventListener('DOMContentLoaded', () => {
+  // Mobile nav toggle
   const btn = document.getElementById('nav-hamburger');
   const links = document.getElementById('navbar-links');
   if (btn) {
     btn.addEventListener('click', () => links.classList.toggle('open'));
   }
 
-  // ربط نموذج الاتصال مع Supabase
+  // Contact forms submission via Formspree
   const forms = [
-    { id: 'contact-form', isArabic: false },
-    { id: 'contact-form-ar', isArabic: true }
+    { id: 'contact-form', ar: false },
+    { id: 'contact-form-ar', ar: true }
   ];
 
-  // تأكد أنك أضفت مكتبة supabase من CDN في index.html أو contact.html
-  import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm').then(({ createClient }) => {
-    const supabase = createClient(
-      window.SUPABASE_URL,
-      window.SUPABASE_ANON_KEY
-    );
+  forms.forEach(({ id, ar }) => {
+    const form = document.getElementById(id);
+    if (!form) return;
+    const feedback = form.querySelector('.feedback');
 
-    forms.forEach(({ id, isArabic }) => {
-      const form = document.getElementById(id);
-      if (!form) return;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = new FormData(form);
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const data = Object.fromEntries(new FormData(form).entries());
-
-        if (!data.subject) delete data.subject;
-
-        const { error } = await supabase.from('messages').insert([data]);
-
-        if (error) {
-          alert((isArabic ? 'خطأ: ' : 'Error: ') + (error.message || 'Unknown'));
-        } else {
-          alert(isArabic ? '✅ تم إرسال رسالتك بنجاح' : '✅ Your message was sent!');
+      try {
+        const res = await fetch('https://formspree.io/f/xrbpvebk', {
+          method: 'POST',
+          body: data,
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          if (feedback) {
+            feedback.textContent = ar
+              ? 'شكراً لك! سنتواصل معك قريباً.'
+              : "Thank you! We'll be in touch soon.";
+            feedback.className = 'feedback success';
+          }
           form.reset();
+        } else {
+          throw new Error();
         }
-      });
+      } catch (err) {
+        if (feedback) {
+          feedback.textContent = ar
+            ? 'فشل الإرسال. حاول مجدداً.'
+            : 'Message failed. Please try again.';
+          feedback.className = 'feedback error';
+        }
+      }
     });
+  });
+
+  // Auto-expand textareas with maxlength + character counter
+  document.querySelectorAll('textarea[maxlength]').forEach((ta) => {
+    const counter = ta.parentElement.querySelector('.char-count');
+    const max = parseInt(ta.getAttribute('maxlength'), 10);
+    const update = () => {
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+      if (counter) {
+        const len = ta.value.length;
+        counter.textContent = `${len}/${max}`;
+        if (len > max * 0.9) counter.classList.add('warn');
+        else counter.classList.remove('warn');
+      }
+    };
+    ta.addEventListener('input', update);
+    update();
   });
 });

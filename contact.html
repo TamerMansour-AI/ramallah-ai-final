@@ -41,7 +41,7 @@
 <main class="container">
   <h1>Contact Us</h1>
   <div class="contact-box">
-    <form id="contact-form" class="contact-form">
+    <form id="contact-form" class="contact-form" action="https://formspree.io/f/xrbpvebk" method="POST">
       <label>Name
         <input name="name" required>
       </label>
@@ -55,6 +55,7 @@
         <textarea name="message" required></textarea>
       </label>
       <button type="submit">Send</button>
+      <p class="feedback" aria-live="polite"></p>
     </form>
     <aside class="contact-info">
       <ul>
