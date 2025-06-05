@@ -14,6 +14,7 @@ The site highlights Palestinian creators using AI tools. Key sections include:
 - **`blog.html`** and **`about.html`** – informational pages.
 - **`contact.html`** – contact form backed by Supabase.
 - **`admin/admin.html`** – lightweight admin interface to approve submissions.
+- **`profile.html`** – edit your account details after logging in.
 
 ## Basic setup
 
@@ -36,6 +37,11 @@ window.SUPABASE_ANON_KEY = 'your_anon_key'
 
 These keys are referenced at runtime by the JavaScript files. Keep them out of
 source control—`.env` and `js/env.js` are already in `.gitignore`.
+
+### Profiles table
+
+Authenticated users can update their details on `profile.html`. Create the
+`profiles` table in your Supabase project using `sql/profiles.sql`.
 
 ## Dependencies
 

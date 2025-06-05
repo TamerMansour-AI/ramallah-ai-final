@@ -20,6 +20,15 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       const form = document.querySelector("#login-form");
+
+      // Redirect already logged in users
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) window.location.replace("profile.html");
+      });
+      supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) window.location.replace("profile.html");
+      });
+
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const email = form.email.value;

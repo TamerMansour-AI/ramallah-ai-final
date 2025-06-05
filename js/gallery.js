@@ -30,6 +30,7 @@ const sectionMap = {
 
 let allItems = [];
 let creatorsMap = {};
+let profilesMap = {};
 const batchSize = 12;
 let itemsShown = batchSize;
 let shuffleEnabled = false;
@@ -96,6 +97,18 @@ async function fetchCreators() {
   }
 }
 
+async function fetchProfiles() {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id,slug');
+  if (!error && data) {
+    profilesMap = {};
+    data.forEach((p) => {
+      profilesMap[p.id] = p.slug;
+    });
+  }
+}
+
 async function fetchLikes(ids) {
   likeCounts = {};
   if (!ids.length) return;
@@ -113,6 +126,7 @@ async function fetchLikes(ids) {
 
 async function fetchData() {
   await fetchCreators();
+  await fetchProfiles();
   shuffleEnabled = sortOrder === 'random';
   let query = supabase
     .from('submissions')
@@ -216,13 +230,22 @@ function renderFiltered(reset = false) {
       metaDiv.className = 'gallery-meta';
       metaDiv.textContent = isArabic ? 'بواسطة ' : 'By ';
       const b = document.createElement('b');
-      const slug = creatorsMap[creatorName.toLowerCase()];
       const a = document.createElement('a');
       a.textContent = creatorName;
-      if (slug) {
-        a.href = `creator${isArabic ? '-ar' : ''}.html?id=${encodeURIComponent(slug)}`;
-      } else {
-        a.href = `gallery${isArabic ? '-ar' : ''}.html?creator=${encodeURIComponent(creatorName)}`;
+      let slug = null;
+      if (item.profile_id) {
+        slug = profilesMap[item.profile_id];
+        if (slug) {
+          a.href = `profile.html?slug=${encodeURIComponent(slug)}`;
+        }
+      }
+      if (!slug) {
+        slug = creatorsMap[creatorName.toLowerCase()];
+        if (slug) {
+          a.href = `creator${isArabic ? '-ar' : ''}.html?id=${encodeURIComponent(slug)}`;
+        } else {
+          a.href = `gallery${isArabic ? '-ar' : ''}.html?creator=${encodeURIComponent(creatorName)}`;
+        }
       }
       b.appendChild(a);
       metaDiv.appendChild(b);
@@ -419,7 +442,25 @@ function openModal(item) {
   if (creatorName) {
     const p = document.createElement('p');
     p.className = 'modal-creator';
-    p.textContent = (isArabic ? 'بواسطة ' : 'By ') + creatorName;
+    p.textContent = isArabic ? 'بواسطة ' : 'By ';
+    const b = document.createElement('b');
+    const a = document.createElement('a');
+    a.textContent = creatorName;
+    let slug = null;
+    if (item.profile_id) {
+      slug = profilesMap[item.profile_id];
+      if (slug) a.href = `profile.html?slug=${encodeURIComponent(slug)}`;
+    }
+    if (!slug) {
+      slug = creatorsMap[creatorName.toLowerCase()];
+      if (slug) {
+        a.href = `creator${isArabic ? '-ar' : ''}.html?id=${encodeURIComponent(slug)}`;
+      } else {
+        a.href = `gallery${isArabic ? '-ar' : ''}.html?creator=${encodeURIComponent(creatorName)}`;
+      }
+    }
+    b.appendChild(a);
+    p.appendChild(b);
     modal.appendChild(p);
   }
 
