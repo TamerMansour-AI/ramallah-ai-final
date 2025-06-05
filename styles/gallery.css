@@ -84,6 +84,8 @@
   text-decoration: underline;
 }
 
+.gallery-card .share-icons{margin-top:.5rem}
+
 
 .filter-bar {
   display: flex;
