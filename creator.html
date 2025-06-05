@@ -151,7 +151,7 @@
         </div>
 
         <div class="share-box">
-          <button id="share-btn" class="cta-btn">🔗 Share</button>
+          <div id="share-buttons" class="share-icons"></div>
           <span id="share-status" style="font-size:0.9rem;color:gray;"></span>
         </div>
 
@@ -199,7 +199,7 @@
     });
 
     // Share logic
-    const shareBtn = document.getElementById('share-btn');
+    const shareContainer = document.getElementById('share-buttons');
     const shareStatus = document.getElementById('share-status');
     const shareTitle = `${data.name} – Ramallah.ai`;
     const shareText = isArabic
@@ -207,19 +207,54 @@
       : `Meet ${data.name} on Ramallah.ai`;
     const shareUrl = window.location.href;
 
-    shareBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        shareStatus.textContent = isArabic
-          ? '📋 تم نسخ الرابط'
-          : '📋 Link copied!';
-        setTimeout(() => (shareStatus.textContent = ''), 2000);
-      } catch {
-        shareStatus.textContent = isArabic
-          ? '❌ لم يتم نسخ الرابط'
-          : '❌ Failed to copy link.';
-      }
-    });
+    const isMobileShare = navigator.share && window.innerWidth < 768;
+
+    if (isMobileShare) {
+      const btn = document.createElement('button');
+      btn.textContent = '🔗';
+      btn.title = isArabic ? 'مشاركة' : 'Share';
+      btn.addEventListener('click', () => {
+        navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
+      });
+      shareContainer.appendChild(btn);
+    } else {
+      const openWin = (u) => window.open(u, '_blank');
+      const wa = document.createElement('button');
+      wa.textContent = '💬';
+      wa.title = 'WhatsApp';
+      wa.addEventListener('click', () =>
+        openWin(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`)
+      );
+      const fb = document.createElement('button');
+      fb.textContent = '📘';
+      fb.title = 'Facebook';
+      fb.addEventListener('click', () =>
+        openWin(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`)
+      );
+      const tw = document.createElement('button');
+      tw.textContent = '🐦';
+      tw.title = 'X';
+      tw.addEventListener('click', () =>
+        openWin(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`)
+      );
+      const copy = document.createElement('button');
+      copy.textContent = '🔗';
+      copy.title = isArabic ? 'نسخ الرابط' : 'Copy link';
+      copy.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          shareStatus.textContent = isArabic
+            ? '📋 تم نسخ الرابط'
+            : '📋 Link copied!';
+          setTimeout(() => (shareStatus.textContent = ''), 2000);
+        } catch {
+          shareStatus.textContent = isArabic
+            ? '❌ لم يتم نسخ الرابط'
+            : '❌ Failed to copy link.';
+        }
+      });
+      [wa, fb, tw, copy].forEach((b) => shareContainer.appendChild(b));
+    }
   })();
 }
 </script>

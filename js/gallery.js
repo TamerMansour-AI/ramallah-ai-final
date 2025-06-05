@@ -27,6 +27,53 @@ const params = new URLSearchParams(window.location.search);
 const creatorParam = (params.get('creator') || '').toLowerCase();
 const isArabic = document.documentElement.lang === 'ar';
 
+function createShareButtons(url, text) {
+  const container = document.createElement('div');
+  container.className = 'share-icons';
+  const isMobileShare = navigator.share && window.innerWidth < 768;
+  if (isMobileShare) {
+    const btn = document.createElement('button');
+    btn.textContent = '🔗';
+    btn.title = isArabic ? 'مشاركة' : 'Share';
+    btn.addEventListener('click', () => {
+      navigator.share({ title: text, text, url }).catch(() => {});
+    });
+    container.appendChild(btn);
+  } else {
+    const openWin = (u) => window.open(u, '_blank');
+    const wa = document.createElement('button');
+    wa.textContent = '💬';
+    wa.title = 'WhatsApp';
+    wa.addEventListener('click', () =>
+      openWin(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`)
+    );
+    const fb = document.createElement('button');
+    fb.textContent = '📘';
+    fb.title = 'Facebook';
+    fb.addEventListener('click', () =>
+      openWin(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`)
+    );
+    const tw = document.createElement('button');
+    tw.textContent = '🐦';
+    tw.title = 'X';
+    tw.addEventListener('click', () =>
+      openWin(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`)
+    );
+    const copy = document.createElement('button');
+    copy.textContent = '🔗';
+    copy.title = isArabic ? 'نسخ الرابط' : 'Copy link';
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        copy.textContent = '✅';
+        setTimeout(() => (copy.textContent = '🔗'), 1500);
+      } catch {}
+    });
+    [wa, fb, tw, copy].forEach((b) => container.appendChild(b));
+  }
+  return container;
+}
+
 async function fetchCreators() {
   const { data, error } = await supabase.from('creators').select('name,slug');
   if (!error && data) {
@@ -162,6 +209,9 @@ function renderFiltered(reset = false) {
       link.textContent = '🔗 View Work';
       card.appendChild(link);
     }
+
+    const share = createShareButtons(item.link || window.location.href, item.title || '');
+    card.appendChild(share);
 
     container.appendChild(card);
   });
