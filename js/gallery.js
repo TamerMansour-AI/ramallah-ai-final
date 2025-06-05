@@ -6,6 +6,16 @@ const supabase = createClient(
   window.SUPABASE_ANON_KEY
 );
 
+let visitorIP = '';
+async function fetchIP() {
+  try {
+    const res = await fetch('https://api.ipify.org?format=json');
+    const json = await res.json();
+    visitorIP = json.ip;
+  } catch {}
+}
+fetchIP();
+
 // الأقسام الظاهرة فى الـ HTML
 const sections = ['images', 'music', 'videos', 'blogs', 'books'];
 
@@ -23,6 +33,8 @@ let creatorsMap = {};
 const batchSize = 12;
 let itemsShown = batchSize;
 let shuffleEnabled = false;
+let sortOrder = 'newest';
+let likeCounts = {};
 const params = new URLSearchParams(window.location.search);
 const creatorParam = (params.get('creator') || '').toLowerCase();
 const isArabic = document.documentElement.lang === 'ar';
@@ -84,12 +96,39 @@ async function fetchCreators() {
   }
 }
 
+async function fetchLikes(ids) {
+  likeCounts = {};
+  if (!ids.length) return;
+  const slugs = ids.map((id) => `item-${id}`);
+  const { data } = await supabase
+    .from('likes')
+    .select('slug,count')
+    .in('slug', slugs);
+  if (data) {
+    data.forEach((row) => {
+      likeCounts[row.slug] = row.count;
+    });
+  }
+}
+
 async function fetchData() {
   await fetchCreators();
-  const { data, error } = await supabase
+  shuffleEnabled = sortOrder === 'random';
+  let query = supabase
     .from('submissions')
     .select('*')
     .eq('status', 'approved');
+
+  if (sortOrder === 'newest') {
+    query = query.order('id', { ascending: false });
+  } else if (sortOrder === 'random') {
+    shuffleEnabled = true;
+    query = query.order('id');
+  } else if (sortOrder === 'likes') {
+    query = query.order('id', { ascending: false });
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('❌ Error loading data:', error);
@@ -97,6 +136,12 @@ async function fetchData() {
   }
 
   console.log('✅ Fetched data from Supabase', data);
+
+  await fetchLikes(data.map((i) => i.id));
+
+  if (sortOrder === 'likes') {
+    data.sort((a, b) => (likeCounts[`item-${b.id}`] || 0) - (likeCounts[`item-${a.id}`] || 0));
+  }
 
   // 🧹 تنظيف البيانات: فقط اللي عنده عنوان وصورة (أو thumb)
   allItems = data.filter(item => {
@@ -202,6 +247,39 @@ function renderFiltered(reset = false) {
     descDiv.textContent = item.desc_en || item.desc_ar || '';
     card.appendChild(descDiv);
 
+    const slug = `item-${item.id}`;
+    let count = likeCounts[slug] || 0;
+    const likeBox = document.createElement('div');
+    likeBox.className = 'like-box';
+    const likeBtn = document.createElement('button');
+    likeBtn.className = 'like-btn';
+    likeBtn.textContent = '👍';
+    const countSpan = document.createElement('span');
+    countSpan.className = 'like-count';
+    countSpan.textContent = count;
+    likeBox.appendChild(likeBtn);
+    likeBox.appendChild(countSpan);
+    const likedKey = visitorIP ? `liked_${slug}_${visitorIP}` : `liked_${slug}`;
+    if (localStorage.getItem(likedKey)) {
+      likeBtn.disabled = true;
+      likeBtn.title = 'Liked ❤️';
+    }
+    likeBtn.addEventListener('click', async () => {
+      if (localStorage.getItem(likedKey)) return;
+      const { error } = await supabase
+        .from('likes')
+        .upsert({ slug, count: count + 1 }, { onConflict: 'slug' });
+      if (!error) {
+        count++;
+        likeCounts[slug] = count;
+        countSpan.textContent = count;
+        likeBtn.disabled = true;
+        likeBtn.title = 'Liked ❤️';
+        localStorage.setItem(likedKey, '1');
+      }
+    });
+    card.appendChild(likeBox);
+
     if (item.link && item.type !== 'image') {
       const link = document.createElement('a');
       link.href = item.link;
@@ -247,15 +325,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const search = document.getElementById('search-input');
   const filter = document.getElementById('type-filter');
 
-  const shuffleToggle = document.getElementById('shuffle-toggle');
+  const sortSelect = document.getElementById('sort-order');
   const loadMoreBtn = document.getElementById('load-more-btn');
 
   if (search) search.addEventListener('input', () => renderFiltered(true));
   if (filter) filter.addEventListener('change', () => renderFiltered(true));
-  if (shuffleToggle)
-    shuffleToggle.addEventListener('change', () => {
-      shuffleEnabled = shuffleToggle.checked;
-      renderFiltered(true);
+  if (sortSelect)
+    sortSelect.addEventListener('change', () => {
+      sortOrder = sortSelect.value;
+      shuffleEnabled = sortOrder === 'random';
+      fetchData();
     });
   if (loadMoreBtn)
     loadMoreBtn.addEventListener('click', () => {
