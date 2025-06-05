@@ -106,6 +106,13 @@
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
   const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  let visitorIP = '';
+  (async () => {
+    try {
+      const res = await fetch('https://api.ipify.org?format=json');
+      visitorIP = (await res.json()).ip;
+    } catch {}
+  })();
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('id');
 
@@ -173,26 +180,29 @@
     let currentCount = likeData?.count || 0;
     likeCountEl.textContent = `${currentCount} likes`;
 
-    const likedKey = `liked_${slug}`;
-    if (localStorage.getItem(likedKey)) {
+    const baseKey = `liked_${slug}`;
+    const likedKey = visitorIP ? `${baseKey}_${visitorIP}` : baseKey;
+    if (localStorage.getItem(baseKey) || localStorage.getItem(likedKey)) {
       likeBtn.disabled = true;
       likeBtn.textContent = '❤️ Liked';
+      likeBtn.title = 'Liked ❤️';
     }
 
     likeBtn.addEventListener('click', async () => {
-      if (localStorage.getItem(likedKey)) return;
+      if (localStorage.getItem(baseKey) || localStorage.getItem(likedKey)) return;
 
       const { error: updateError } = await supabase
         .from('likes')
-        .update({ count: currentCount + 1 })
-        .eq('slug', slug);
+        .upsert({ slug, count: currentCount + 1 }, { onConflict: 'slug' });
 
       if (!updateError) {
         currentCount++;
         likeCountEl.textContent = `${currentCount} likes`;
         likeBtn.disabled = true;
         likeBtn.textContent = '❤️ Liked';
-        localStorage.setItem(likedKey, '1');
+        likeBtn.title = 'Liked ❤️';
+        localStorage.setItem(baseKey, '1');
+        if (visitorIP) localStorage.setItem(likedKey, '1');
       } else {
         alert('Something went wrong.');
       }
