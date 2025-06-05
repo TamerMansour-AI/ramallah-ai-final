@@ -199,6 +199,7 @@ function renderFiltered(reset = false) {
     const imgSrc = item.type === 'image' ? item.link : item.thumb || '';
     const card = document.createElement('div');
     card.className = 'gallery-card show';
+    card.dataset.id = item.id;
 
     if (imgSrc) {
       const img = document.createElement('img');
@@ -343,16 +344,147 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-document.addEventListener('click', function (e) {
-  if (e.target.classList.contains('clickable-image')) {
-    const overlay = document.createElement('div');
-    overlay.className = 'lightbox-overlay';
-    const img = document.createElement('img');
-    img.src = e.target.src;
-    overlay.appendChild(img);
-    document.body.appendChild(overlay);
+let modalOverlay;
 
-    overlay.addEventListener('click', () => overlay.remove());
+function closeModal() {
+  if (modalOverlay) {
+    modalOverlay.remove();
+    modalOverlay = null;
+    document.removeEventListener('keydown', escHandler);
   }
+}
+
+function escHandler(e) {
+  if (e.key === 'Escape') closeModal();
+}
+
+async function loadComments(itemId, list) {
+  const { data } = await supabase
+    .from('comments')
+    .select('name, comment, timestamp')
+    .eq('item_id', itemId)
+    .order('timestamp', { ascending: false })
+    .limit(3);
+  list.innerHTML = '';
+  if (data) {
+    data.forEach((c) => {
+      const li = document.createElement('li');
+      li.textContent = `${c.name}: ${c.comment}`;
+      list.appendChild(li);
+    });
+  }
+}
+
+function openModal(item) {
+  closeModal();
+  modalOverlay = document.createElement('div');
+  modalOverlay.className = 'modal-overlay';
+  const modal = document.createElement('div');
+  modal.className = 'gallery-modal';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'modal-close';
+  closeBtn.textContent = '×';
+  closeBtn.addEventListener('click', closeModal);
+  modal.appendChild(closeBtn);
+
+  let media;
+  if (item.type === 'image' && item.link) {
+    media = document.createElement('img');
+    media.src = item.link;
+    media.alt = item.title || '';
+  } else if (item.type === 'video' && item.link) {
+    media = document.createElement('iframe');
+    media.src = item.link;
+    media.allowFullscreen = true;
+  } else if (item.type === 'music' && item.link) {
+    media = document.createElement('audio');
+    media.controls = true;
+    media.src = item.link;
+  } else if (item.thumb) {
+    media = document.createElement('img');
+    media.src = item.thumb;
+    media.alt = item.title || '';
+  }
+  if (media) media.className = 'modal-media';
+  if (media) modal.appendChild(media);
+
+  if (item.title) {
+    const h3 = document.createElement('h3');
+    h3.textContent = item.title;
+    modal.appendChild(h3);
+  }
+
+  const creatorName = item.creator_name || item.creator;
+  if (creatorName) {
+    const p = document.createElement('p');
+    p.className = 'modal-creator';
+    p.textContent = (isArabic ? 'بواسطة ' : 'By ') + creatorName;
+    modal.appendChild(p);
+  }
+
+  if (item.desc_en || item.desc_ar) {
+    const p = document.createElement('p');
+    p.className = 'modal-desc';
+    p.textContent = item.desc_en || item.desc_ar;
+    modal.appendChild(p);
+  }
+
+  if (item.link && item.type !== 'image') {
+    const a = document.createElement('a');
+    a.href = item.link;
+    a.target = '_blank';
+    a.className = 'modal-view-btn';
+    a.textContent = isArabic ? 'مشاهدة العمل' : 'View Work';
+    modal.appendChild(a);
+  }
+
+  // Comments
+  const commentBox = document.createElement('div');
+  commentBox.className = 'comment-box';
+  commentBox.innerHTML = `\n    <form class="comment-form">\n      <input name="name" placeholder="${isArabic ? 'الاسم' : 'Name'}" required>\n      <textarea name="comment" placeholder="${isArabic ? 'تعليق' : 'Comment'}" required></textarea>\n      <button type="submit">${isArabic ? 'إرسال' : 'Send'}</button>\n    </form>\n    <ul class="comments-list"></ul>\n  `;
+  modal.appendChild(commentBox);
+
+  modalOverlay.appendChild(modal);
+  document.body.appendChild(modalOverlay);
+
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) closeModal();
+  });
+  document.addEventListener('keydown', escHandler);
+
+  const listEl = commentBox.querySelector('.comments-list');
+  loadComments(item.id, listEl);
+  const form = commentBox.querySelector('form');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = form.name.value.trim();
+    const text = form.comment.value.trim();
+    if (!name || !text) return;
+    const { error } = await supabase.from('comments').insert({
+      item_id: item.id,
+      name,
+      comment: text,
+    });
+    if (!error) {
+      form.reset();
+      loadComments(item.id, listEl);
+    }
+  });
+}
+
+document.addEventListener('click', function (e) {
+  const card = e.target.closest('.gallery-card');
+  if (!card) return;
+  if (
+    e.target.closest('a') ||
+    e.target.closest('.like-btn') ||
+    e.target.closest('.share-icons')
+  ) {
+    return;
+  }
+  const id = parseInt(card.dataset.id, 10);
+  const item = allItems.find((i) => i.id === id);
+  if (item) openModal(item);
 });
 
