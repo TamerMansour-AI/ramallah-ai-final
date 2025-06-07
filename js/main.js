@@ -6,6 +6,17 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => links.classList.toggle('open'));
   }
 
+  const navbar = document.querySelector('.navbar');
+  if (navbar) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 10) {
+        navbar.classList.add('shadow');
+      } else {
+        navbar.classList.remove('shadow');
+      }
+    });
+  }
+
   // Contact forms submission via Formspree
   const forms = [
     { id: 'contact-form', ar: false },
