@@ -38,6 +38,13 @@ let sortOrder = 'newest';
 let likeCounts = {};
 const params = new URLSearchParams(window.location.search);
 const creatorParam = (params.get('creator') || '').toLowerCase();
+
+function getFallbackThumb(link) {
+  if (!link) return '';
+  const yt = link.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w-]{11})/);
+  if (yt) return `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg`;
+  return '/assets/icons/link.svg';
+}
 const isArabic = document.documentElement.lang === 'ar';
 
 function createShareButtons(url, text) {
@@ -210,7 +217,7 @@ function renderFiltered(reset = false) {
     if (!container) return;
     hasData[section] = true;
 
-    const imgSrc = item.type === 'image' ? item.link : item.thumb || '';
+    const imgSrc = item.type === 'image' ? item.link : item.thumb || getFallbackThumb(item.link);
     const card = document.createElement('div');
     card.className = 'gallery-card show';
     card.dataset.id = item.id;

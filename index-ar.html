@@ -62,17 +62,17 @@
     <h2>قصص نجاح</h2>
     <div class="story-carousel">
       <a class="story-card" href="story1-ar.html">
-        <img src="images/success/laila-work.png" alt="لقطة من فيلم ليلى القصير">
+        <img loading="lazy" src="images/success/laila-work.png" alt="لقطة من فيلم ليلى القصير">
         <h3>فيلم ليلى</h3>
         <p>باستخدام Stable Diffusion وRunway.</p>
       </a>
       <a class="story-card" href="story2-ar.html">
-        <img src="images/success/rami-work.png" alt="رامي يعمل على مقطوعة موسيقية بالذكاء الاصطناعي">
+        <img loading="lazy" src="images/success/rami-work.png" alt="رامي يعمل على مقطوعة موسيقية بالذكاء الاصطناعي">
         <h3>مقطوعة رامي</h3>
         <p>تأليف AI في Ableton.</p>
       </a>
       <a class="story-card" href="story3-ar.html">
-        <img src="images/gallery/gallery-art.png" alt="عمل فني">
+        <img loading="lazy" src="images/gallery/gallery-art.png" alt="عمل فني">
         <h3>مشروع ملهم آخر</h3>
         <p>استكشاف تقنيات الذكاء الاصطناعي.</p>
       </a>
@@ -83,9 +83,10 @@
     <h2>شارك عملك</h2>
     <p class="helper-note">🔗 نصيحة: فعّل خيار “أي شخص لديه الرابط” في Google Drive.</p>
     <form id="ai-submit-form-ar" action="https://formspree.io/f/xrbpvebk" method="POST">
-      <label>الاسم <input name="fullName" required></label>
-      <label>نوع العمل
-        <select name="workType" required>
+      <label for="fullName-ar">الاسم</label>
+      <input id="fullName-ar" name="fullName" required>
+      <label for="workType-ar">نوع العمل</label>
+        <select id="workType-ar" name="workType" required>
           <option>صورة</option>
           <option>موسيقى</option>
           <option>فيديو</option>
@@ -94,21 +95,20 @@
           <option>كتاب</option>
           <option>بودكاست</option>
         </select>
-      </label>
-      <label>
-        Upload file (image/video/audio):
-        <input type="file" name="workFile" accept="image/*,video/*,audio/*">
-      </label>
-      <label>وصف
-        <textarea name="description" rows="3" maxlength="500" required></textarea>
+      <label for="workFile-ar">Upload file (image/video/audio):</label>
+      <input id="workFile-ar" type="file" name="workFile" accept="image/*,video/*,audio/*">
+      <label for="upload-link-ar">أو الصق رابطاً</label>
+      <input type="url" id="upload-link-ar" name="workLink" placeholder="https://youtu.be/…" pattern="https?://.+" autocomplete="off">
+      <label for="description-ar">وصف</label>
+        <textarea id="description-ar" name="description" rows="3" maxlength="500" required></textarea>
         <div class="char-count">0/500</div>
-      </label>
-      <button class="cta-btn">إرسال</button>
+      <progress class="upload-progress" max="100" value="0" style="display:none"></progress>
+      <button class="cta-btn btn-primary" type="submit">إرسال</button>
     </form>
 
     <div id="thank-you-modal-ar" class="thank-you-modal">
       <div class="modal-content">
-        <span id="close-modal-btn-ar" class="modal-close">&times;</span>
+        <button id="close-modal-btn-ar" class="modal-close" aria-label="Close">&times;</button>
         <h3>شكراً لك!</h3>
         <p>تم استلام مشاركتك.</p>
       </div>

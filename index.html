@@ -65,17 +65,17 @@
     <h2>Success Stories</h2>
     <div class="story-carousel">
       <a class="story-card" href="story1.html">
-        <img src="images/success/laila-work.png" alt="Still from Laila's animated short film">
+        <img loading="lazy" src="images/success/laila-work.png" alt="Still from Laila's animated short film">
         <h3>Laila’s animated short</h3>
         <p>Created with Stable Diffusion & Runway.</p>
       </a>
       <a class="story-card" href="story2.html">
-        <img src="images/success/rami-work.png" alt="Rami creating music with AI tools">
+        <img loading="lazy" src="images/success/rami-work.png" alt="Rami creating music with AI tools">
         <h3>Rami’s generative track</h3>
         <p>AI‑assisted composition in Ableton.</p>
       </a>
       <a class="story-card" href="story3.html">
-        <img src="images/gallery/gallery-art.png" alt="Placeholder art">
+        <img loading="lazy" src="images/gallery/gallery-art.png" alt="Placeholder art">
         <h3>Another inspiring project</h3>
         <p>Exploring creative AI techniques.</p>
       </a>
@@ -86,9 +86,10 @@
     <h2>Submit your work</h2>
     <p class="helper-note">🔗 Tip: If using Google Drive, set sharing to “Anyone with the link”.</p>
     <form id="ai-submit-form" action="https://formspree.io/f/xrbpvebk" method="POST">
-      <label>Name <input name="fullName" required></label>
-      <label>Type
-        <select name="workType" required>
+      <label for="fullName">Name</label>
+      <input id="fullName" name="fullName" required>
+      <label for="workType">Type</label>
+        <select id="workType" name="workType" required>
           <option>Image</option>
           <option>Music</option>
           <option>Video</option>
@@ -97,20 +98,19 @@
           <option>Book</option>
           <option>Podcast</option>
         </select>
-      </label>
-      <label>
-        Upload file (image/video/audio):
-        <input type="file" name="workFile" accept="image/*,video/*,audio/*">
-      </label>
-      <label>Description
-        <textarea name="description" rows="3" maxlength="500" required></textarea>
+      <label for="workFile">Upload file (image/video/audio):</label>
+      <input id="workFile" type="file" name="workFile" accept="image/*,video/*,audio/*">
+      <label for="upload-link">or paste a link</label>
+      <input type="url" id="upload-link" name="workLink" placeholder="https://youtu.be/…" pattern="https?://.+" autocomplete="off">
+      <label for="description">Description</label>
+        <textarea id="description" name="description" rows="3" maxlength="500" required></textarea>
         <div class="char-count">0/500</div>
-      </label>
-      <button class="cta-btn">Send</button>
+      <progress class="upload-progress" max="100" value="0" style="display:none"></progress>
+      <button class="cta-btn btn-primary" type="submit">Send</button>
     </form>
     <div id="thank-you-modal" class="thank-you-modal">
       <div class="modal-content">
-        <span id="close-modal-btn" class="modal-close">&times;</span>
+        <button id="close-modal-btn" class="modal-close" aria-label="Close">&times;</button>
         <h3>Thank you!</h3>
         <p>Your submission was received.</p>
       </div>
