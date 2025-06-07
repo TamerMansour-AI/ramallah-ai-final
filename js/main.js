@@ -66,4 +66,21 @@ document.addEventListener('DOMContentLoaded', () => {
     ta.addEventListener('input', update);
     update();
   });
+
+  // Simple success stories slider
+  const carousel = document.querySelector('.story-carousel');
+  if (carousel) {
+    const slides = Array.from(carousel.children);
+    let index = 0;
+    const show = () => {
+      slides.forEach((s, i) => {
+        s.style.display = i === index ? 'block' : 'none';
+      });
+    };
+    show();
+    setInterval(() => {
+      index = (index + 1) % slides.length;
+      show();
+    }, 5000);
+  }
 });
