@@ -1,51 +1,49 @@
 import { SUPABASE_URL, SUPABASE_KEY } from './env.js';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { mountComments } from './comments.js';
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allItems=[];
 const grid   = document.getElementById('gallery-grid');
 const modal  = document.getElementById('previewModal');
 const modalC = document.getElementById('modalContent');
-const btnX   = document.getElementById('closeModal');
-btnX?.addEventListener('click', ()=>modal.close());
-modal.addEventListener('click', e=>{ if(e.target===modal) modal.close(); });
+document.getElementById('closeModal')?.addEventListener('click',()=>modal.close());
+modal.addEventListener('click',e=>{if(e.target===modal) modal.close();});
 
-const q  = document.getElementById('searchInput');
-const ft = document.getElementById('filterType');
-const ss = document.getElementById('sortSelect');
-[q,ft,ss].forEach(el=>el?.addEventListener('input', refresh));
+const q=document.getElementById('searchInput'),
+      ft=document.getElementById('filterType'),
+      ss=document.getElementById('sortSelect');
+[q,ft,ss].forEach(el=>el?.addEventListener('input',refresh));
 
-document.addEventListener('DOMContentLoaded', loadGallery);
+document.addEventListener('DOMContentLoaded',loadGallery);
 
 async function loadGallery(){
   const { data:subs } = await supabase
-       .from('submissions')
-       .select('id,title_en,type,link,creator_name,creator_slug,status,created_at')
-       .eq('status','approved');
-  const { data:lk } = await supabase
-       .from('likes')
-       .select('slug,count');
+      .from('submissions')
+      .select('id,title_en,type,link,creator_name,creator_slug,status,created_at')
+      .eq('status','approved');
 
-  const likeMap=Object.fromEntries((lk||[]).map(r=>[r.slug,r.count]));
-  allItems=subs.map(it=>({...it,likes:likeMap[it.id]||0}))
-               .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const { data:lk } = await supabase.from('likes').select('slug,count');
+  const likeMap = Object.fromEntries((lk||[]).map(r=>[r.slug,r.count]));
+
+  allItems = subs.map(x=>({...x,likes:likeMap[x.id]||0}))
+                 .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
   render(allItems);
 }
 
 /* helpers */
-const imgExt=/\.(png|jpe?g|webp|gif|avif)(\?.*)?$/i;
-function isImg(url){ return imgExt.test(url)||url.startsWith('https://cdn.midjourney.com'); }
+const imgExt=/\.(png|jpe?g|gif|webp|avif)(\?.*)?$/i;
+const isImg=u=>imgExt.test(u)||u.startsWith('https://cdn.midjourney.com');
+const ytThumb=u=>`https://img.youtube.com/vi/${u.split('v=')[1]?.slice(0,11)}/hqdefault.jpg`;
 function thumb(it){
   if(it.type==='image'&&it.link&&isImg(it.link)) return it.link;
-  if(it.link?.includes('youtu')){
-     const id=it.link.split('v=')[1]?.slice(0,11);
-     return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-  }
+  if(it.link?.includes('youtu')) return ytThumb(it.link);
   return 'assets/icons/link.svg';
 }
 
 /* like */
-async function like(it, btn){
+async function like(it,btn){
   const key=`liked_${it.id}`;
   if(localStorage.getItem(key)) return;
   const { data } = await supabase
@@ -58,53 +56,56 @@ async function like(it, btn){
   localStorage.setItem(key,'1');
 }
 
-/* modal builder */
+/* modal */
 function openModal(it){
-  const likedKey=`liked_${it.id}`;
+  const liked=`liked_${it.id}`;
   const media = it.type==='image' && isImg(it.link)
-      ? `<img src="${it.link}" class="modal-media">`
-      : it.link?.includes('youtu')
-          ? `<iframe class="modal-media" src="https://www.youtube.com/embed/${it.link.split('v=')[1]?.slice(0,11)}" allowfullscreen></iframe>`
-          : `<a href="${it.link}" target="_blank">Open link</a>`;
+        ? `<img src="${it.link}" class="modal-media">`
+        : it.link?.includes('youtu')
+           ? `<iframe class="modal-media" src="https://www.youtube.com/embed/${it.link.split('v=')[1]?.slice(0,11)}" allowfullscreen></iframe>`
+           : `<a href="${it.link}" target="_blank">Open link</a>`;
 
   modalC.innerHTML = `
       ${media}
-      <button class="like-btn ${localStorage.getItem(likedKey)?'liked':''}">
-         🔥 <span>${it.likes}</span>
-      </button>`;
+      <button class="like-btn ${localStorage.getItem(liked)?'liked':''}">
+        🔥 <span>${it.likes}</span>
+      </button>
+      <div id="cWrap"></div>`;
   const likeBtn = modalC.querySelector('.like-btn');
-  likeBtn.addEventListener('click', e=>{ e.stopPropagation(); like(it,likeBtn); });
+  likeBtn.addEventListener('click',e=>{e.stopPropagation();like(it,likeBtn);});
+
+  mountComments(modalC.querySelector('#cWrap'), it.id);
   modal.showModal();
 }
 
-function buildCard(it){
+/* card */
+function card(it){
   const el=document.createElement('article');
   el.className='card';
   el.innerHTML=`
-     <img src="${thumb(it)}" loading="lazy">
-     <div class="inner">
-       <h3>${it.title_en||'(untitled)'}</h3>
-       <p>By ${
-          it.creator_slug
-            ? `<a href="creator.html?slug=${it.creator_slug}">${it.creator_name}</a>`
-            : (it.creator_name||'Unknown')
-       }</p>
-       <span class="badge">${it.type}</span>
-       <button class="like-btn ${localStorage.getItem(`liked_${it.id}`)?'liked':''}">
-         🔥 <span>${it.likes}</span>
-       </button>
-     </div>`;
+    <img src="${thumb(it)}" loading="lazy">
+    <div class="inner">
+      <h3>${it.title_en||'(untitled)'}</h3>
+      <p>By ${
+       it.creator_slug ? `<a href="creator.html?slug=${it.creator_slug}">${it.creator_name}</a>`
+                       : (it.creator_name||'Unknown')}
+      </p>
+      <span class="badge">${it.type}</span>
+      <button class="like-btn ${localStorage.getItem(`liked_${it.id}`)?'liked':''}">
+        🔥 <span>${it.likes}</span>
+      </button>
+    </div>`;
   const likeBtn=el.querySelector('.like-btn');
-  likeBtn.addEventListener('click', e=>{ e.stopPropagation(); like(it,likeBtn); });
-  el.addEventListener('click', ()=>openModal(it));
+  likeBtn.addEventListener('click',e=>{e.stopPropagation();like(it,likeBtn);});
+  el.addEventListener('click',()=>openModal(it));
   return el;
 }
-function render(list){ grid.innerHTML=''; list.forEach(it=>grid.appendChild(buildCard(it))); }
+function render(list){grid.innerHTML='';list.forEach(it=>grid.appendChild(card(it)));}
 function refresh(){
-  const kw=(q.value||'').toLowerCase(), t=ft.value, s=ss.value;
+  const kw=(q.value||'').toLowerCase(),t=ft.value,s=ss.value;
   let list=allItems.filter(it=>
-    (t==='All'||it.type===t)&&
-    ((it.title_en||'').toLowerCase().includes(kw)||(it.creator_name||'').toLowerCase().includes(kw)));
+     (t==='All'||it.type===t)&&
+     ((it.title_en||'').toLowerCase().includes(kw)||(it.creator_name||'').toLowerCase().includes(kw)));
   if(s==='Oldest') list=[...list].reverse();
   render(list);
 }
