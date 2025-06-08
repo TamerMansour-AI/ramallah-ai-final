@@ -21,3 +21,12 @@
 }
 .badge{display:inline-block;padding:2px 6px;background:#3b7d4a;color:#fff;font-size:.75rem;border-radius:4px}
 .likes{font-size:.8rem;margin-top:4px;color:#fcb400}
+
+/* nicer card look */
+.card img{
+  height: 200px;
+  object-fit: cover;
+}
+.card h3{margin:8px 0 4px;font-size:1rem}
+.card p{margin:0 0 4px;font-size:.85rem;color:#bbb}
+.controls{margin-top:1.5rem}
