@@ -1,15 +1,23 @@
 .gallery-grid{
   display:grid;
   gap:1rem;
-  grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+  grid-template-columns: repeat(auto-fill,minmax(240px,1fr));
 }
 .card{
   background:#1e1e1e;
   border-radius:12px;
   overflow:hidden;
-  cursor:pointer;
   transition:.25s transform;
 }
-.card:hover{transform:scale(1.03)}
+.card:hover{transform:scale(1.03);}
 .card img{width:100%;display:block}
-.controls{margin:2rem auto;text-align:center;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.controls{
+  margin:2rem auto;
+  text-align:center;
+  display:flex;
+  gap:1rem;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+.badge{display:inline-block;padding:2px 6px;background:#3b7d4a;color:#fff;font-size:.75rem;border-radius:4px}
+.likes{font-size:.8rem;margin-top:4px;color:#fcb400}
