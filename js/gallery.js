@@ -40,6 +40,8 @@ const isImg=u=>imgExt.test(u)||u.startsWith('https://cdn.midjourney.com');
 const ytThumb=u=>`https://img.youtube.com/vi/${u.split('v=')[1]?.slice(0,11)}/hqdefault.jpg`;
 function thumb(it){
   if(it.type==='image' && it.link && isImg(it.link)) return it.link;
+  if(it.type==='podcast') return 'assets/icons/podcast.svg';
+  if(it.type==='research' || /\.pdf(\?.*)?$/i.test(it.link||'')) return 'assets/icons/pdf.svg';
   if(it.link?.includes('youtu')) return ytThumb(it.link);
   return 'assets/icons/link.svg';
 }
@@ -61,11 +63,23 @@ async function like(it,btn){
 /* ------------ MODAL ------------ */
 function openModal(it){
   const likedKey=`liked_${it.id}`;
-  const media = it.type==='image' && isImg(it.link)
-     ? `<img src="${it.link}" class="modal-media">`
-     : it.link?.includes('youtu')
-        ? `<iframe class="modal-media" src="https://www.youtube.com/embed/${it.link.split('v=')[1]?.slice(0,11)}" allowfullscreen></iframe>`
-        : `<a href="${it.link}" target="_blank">Open link</a>`;
+  let media='';
+  if(it.type==='image' && isImg(it.link)){
+    media=`<img src="${it.link}" class="modal-media">`;
+  }else if(it.type==='podcast'){
+    if(/\.(mp3|ogg)(\?.*)?$/i.test(it.link||''))
+      media=`<audio controls class="modal-media" src="${it.link}"></audio>`;
+    else if(it.link?.includes('youtu'))
+      media=`<iframe class="modal-media" src="https://www.youtube.com/embed/${it.link.split('v=')[1]?.slice(0,11)}" allowfullscreen></iframe>`;
+    else
+      media=`<a href="${it.link}" target="_blank">Open link</a>`;
+  }else if(it.type==='research' || /\.pdf(\?.*)?$/i.test(it.link||'')){
+    media=`<iframe class="modal-media" src="${it.link}"></iframe>`;
+  }else if(it.link?.includes('youtu')){
+    media=`<iframe class="modal-media" src="https://www.youtube.com/embed/${it.link.split('v=')[1]?.slice(0,11)}" allowfullscreen></iframe>`;
+  }else{
+    media=`<a href="${it.link}" target="_blank">Open link</a>`;
+  }
 
   modalC.innerHTML = `
     ${media}
