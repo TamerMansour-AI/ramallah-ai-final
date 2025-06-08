@@ -30,3 +30,13 @@
 .card h3{margin:8px 0 4px;font-size:1rem}
 .card p{margin:0 0 4px;font-size:.85rem;color:#bbb}
 .controls{margin-top:1.5rem}
+.card .inner{padding:8px}
+.card img{height:200px;object-fit:cover;width:100%}
+#previewModal{
+  border:none;border-radius:8px;padding:0;background:#000;max-width:95vw;
+}
+#previewModal::backdrop{background:rgba(0,0,0,.7)}
+.close-btn{
+  position:absolute;top:6px;right:10px;font-size:24px;
+  background:none;border:none;color:#fff;cursor:pointer;
+}
