@@ -1,27 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Ramallah.ai – AI Creativity from Palestine</title>
-  <meta charset="UTF-8">
-  <meta name="description" content="A bilingual platform showcasing AI-powered creativity from Palestine. Join the movement: share your work, explore others, and celebrate tech + culture."
-  <meta name="keywords" content="AI, Palestine, Ramallah, Creativity, Art, Music, Blogs, Podcasts, Artificial Intelligence">
-  <meta name="author" content="Ramallah.ai">
-  <meta property="og:title" content="Ramallah.ai – AI Creativity from Palestine" />
-  <meta property="og:description" content="Explore a new wave of creativity in Palestine powered by AI." />
-  <meta property="og:image" content="https://ramallah.ai/images/social-preview.jpg" />
-  <meta property="og:url" content="https://ramallah.ai" />
-              <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-                        <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Gallery – Ramallah.ai">
-    <meta name="twitter:description" content="Browse AI-generated images, music, videos, blogs and books from Palestinian creators.">
-    <meta name="twitter:image" content="images/wa.link_lg02ac.png">
-    <link rel="canonical" href="https://ramallah.ai/gallery.html">
+  <meta charset="utf-8">
+  <title>Gallery – Ramallah.ai</title>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/gallery.css">
-  <link rel="icon" href="images/favicon.png" type="image/png" />
-  <script defer src="js/main.js"></script>
 </head>
-
 <body>
 <header class="navbar navbar-dark">
   <div class="navbar-container">
@@ -30,10 +14,11 @@
       <span></span><span></span><span></span>
     </button>
     <nav class="navbar-links" id="navbar-links">
-      <a href="index.html">Home</a>
-      <a href="gallery.html" aria-current="page">Gallery</a>
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="gallery.html">Gallery</a>
       <a href="about.html">About</a>
       <a href="blog.html">Blog</a>
+      <a href="success.html">Success</a>
       <a href="index.html#submit">Submit</a>
       <a href="creator-profiles.html">Creators</a>
       <a href="contact.html">Contact</a>
@@ -42,72 +27,26 @@
   </div>
 </header>
 
-<section class="gallery-intro kufiyya-bg">
-  <div class="container">
-    <p>Explore AI‑powered creations by Palestinian talent.</p>
-    <div class="filter-bar">
-      <input type="text" id="searchInput" placeholder="Search by title or creator">
-      <select id="filterType">
-        <option value="">All Types</option>
-        <option value="images">Images</option>
-        <option value="music">Music</option>
-        <option value="videos">Videos</option>
-        <option value="blogs">Blogs</option>
-        <option value="books">Books</option>
-      </select>
-      <select id="sortSelect">
-        <option value="newest">Newest</option>
-        <option value="oldest">Oldest</option>
-        <option value="likes">Most Liked</option>
-      </select>
-    </div>
-  </div>
-</section>
 
-<section class="gallery-section" id="images">
-  <div class="section-container glass container">
-    <h2>🖼️ Images</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
+  <section class="controls">
+    <input   id="searchInput"  type="text"   placeholder="Search by title or creator">
+    <select  id="filterType">
+       <option value="All">All Types</option>
+       <option value="image">Images</option>
+       <option value="music">Music</option>
+       <option value="podcast">Podcasts</option>
+       <option value="research">Research</option>
+    </select>
+    <select  id="sortSelect">
+       <option value="Newest">Newest</option>
+       <option value="Oldest">Oldest</option>
+       <option value="Most Liked">Most Liked</option>
+    </select>
+  </section>
 
-<section class="gallery-section" id="music">
-  <div class="section-container glass container">
-    <h2>🎶 Music</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="videos">
-  <div class="section-container glass container">
-    <h2>🎥 Videos</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="blogs">
-  <div class="section-container glass container">
-    <h2>📝 Blogs & Articles</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="books">
-  <div class="section-container glass container">
-    <h2>📚 Books & Stories</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<div id="scroll-sentinel"></div>
-<dialog id="preview-dialog"></dialog>
-
-<footer class="footer glass kufiyya-bg">
-  <small>©2025 Ramallah.ai</small>
-</footer>
+  <main id="gallery-grid" class="gallery-grid"></main>
 
   <script src="js/env.js" defer></script>
-  <script src="js/gallery.js" defer></script>
-
+  <script type="module" src="js/gallery.js" defer></script>
 </body>
 </html>

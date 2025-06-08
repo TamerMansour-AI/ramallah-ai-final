@@ -1,32 +1,24 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
-  <title>Ramallah.ai – الإبداع الفلسطيني بالذكاء الاصطناعي</title>
-  <meta charset="UTF-8">
-  <meta name="description" content="A bilingual platform showcasing AI-powered creativity from Palestine. Join the movement: share your work, explore others, and celebrate tech + culture."
-  <meta name="keywords" content="AI, Palestine, Ramallah, Creativity, Art, Music, Blogs, Podcasts, Artificial Intelligence">
-  <meta name="author" content="Ramallah.ai">
-  <meta property="og:title" content="Ramallah.ai – AI Creativity from Palestine" />
-  <meta property="og:description" content="Explore a new wave of creativity in Palestine powered by AI." />
-  <meta property="og:image" content="https://ramallah.ai/images/social-preview.jpg" />
-  <meta property="og:url" content="https://ramallah.ai" />
-              <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta charset="utf-8">
+  <title>Gallery – Ramallah.ai</title>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/gallery.css">
-  <link rel="icon" href="images/favicon.png" type="image/png" />
-  <script defer src="js/main.js"></script>
 </head>
-
 <body>
 <header class="navbar navbar-dark">
   <div class="navbar-container">
     <a class="logo" href="index-ar.html">Ramallah.ai</a>
-    <button id="nav-hamburger" class="navbar-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+    <button id="nav-hamburger" class="navbar-hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <nav class="navbar-links" id="navbar-links">
-      <a href="index-ar.html">الرئيسية</a>
-      <a href="gallery-ar.html" aria-current="page">المعرض</a>
+      <a href="index-ar.html" aria-current="page">الرئيسية</a>
+      <a href="gallery-ar.html">المعرض</a>
       <a href="about-ar.html">من نحن</a>
       <a href="blog-ar.html">مدونة</a>
+      <a href="success-ar.html">قصص نجاح</a>
       <a href="index-ar.html#submit">أرسل عملك</a>
       <a href="creator-profiles-ar.html">المبدعون</a>
       <a href="contact-ar.html">اتصل بنا</a>
@@ -35,70 +27,25 @@
   </div>
 </header>
 
-<section class="gallery-intro kufiyya-bg">
-  <div class="container">
-    <p>استكشف إبداعات الذكاء الاصطناعي من المواهب الفلسطينية.</p>
-    <div class="filter-bar">
-      <input type="text" id="searchInput" placeholder="بحث بالعنوان أو اسم المبدع">
-      <select id="filterType">
-        <option value="">كل الأنواع</option>
-        <option value="images">صور</option>
-        <option value="music">موسيقى</option>
-        <option value="videos">فيديو</option>
-        <option value="blogs">مدونات</option>
-        <option value="books">كتب</option>
-      </select>
-      <select id="sortSelect">
-        <option value="newest">الأحدث</option>
-        <option value="oldest">الأقدم</option>
-        <option value="likes">الأكثر إعجاباً</option>
-      </select>
-    </div>
-  </div>
-</section>
+  <section class="controls">
+    <input id="searchInput" type="text" placeholder="بحث بعنوان أو منشئ">
+    <select id="filterType">
+       <option value="All">كل الأنواع</option>
+       <option value="image">صور</option>
+       <option value="music">موسيقى</option>
+       <option value="podcast">بودكاست</option>
+       <option value="research">أبحاث</option>
+    </select>
+    <select id="sortSelect">
+       <option value="Newest">الأحدث</option>
+       <option value="Oldest">الأقدم</option>
+       <option value="Most Liked">الأكثر إعجاباً</option>
+    </select>
+  </section>
 
-<section class="gallery-section" id="images">
-  <div class="section-container glass container">
-    <h2>🖼️ الصور</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
+  <main id="gallery-grid" class="gallery-grid"></main>
 
-<section class="gallery-section" id="music">
-  <div class="section-container glass container">
-    <h2>🎶 الموسيقى</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="videos">
-  <div class="section-container glass container">
-    <h2>🎥 الفيديو</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="blogs">
-  <div class="section-container glass container">
-    <h2>📝 المدونات والمقالات</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="books">
-  <div class="section-container glass container">
-    <h2>📚 الكتب والقصص</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<div id="scroll-sentinel"></div>
-<dialog id="preview-dialog"></dialog>
-
-<footer class="footer glass kufiyya-bg">
-  <small>©2025 Ramallah.ai</small>
-</footer>
-<script src="js/env.js" defer></script>
-<script src="js/gallery.js" defer></script>
+  <script src="js/env.js" defer></script>
+  <script type="module" src="js/gallery.js" defer></script>
 </body>
 </html>
