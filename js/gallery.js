@@ -11,7 +11,7 @@ async function loadGallery(){
     .from('submissions')
     .select(`id,title_en,type,thumb_url,file_path,link,creator_name,likes,created_at,status`)
     .eq('status','approved');
-  if(error){console.error(error);return}
+  if(error){return}
   allItems=data.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
   render(allItems);
 }
@@ -37,4 +37,23 @@ function buildCard(it){
 }
 function render(list){
   grid.innerHTML=''; list.forEach(it=>grid.appendChild(buildCard(it)));
+}
+
+const q=document.getElementById('searchInput');
+const ft=document.getElementById('filterType');
+const ss=document.getElementById('sortSelect');
+[q,ft,ss].forEach(el=>el?.addEventListener('input',refresh));
+
+function refresh(){
+  const kw=(q.value||'').toLowerCase();
+  const type=ft.value;
+  const sort=ss.value;
+  let list=allItems.filter(it=>
+    (type==='All'||it.type===type) &&
+    ((it.title_en||'').toLowerCase().includes(kw)||
+     (it.creator_name||'').toLowerCase().includes(kw))
+  );
+  if(sort==='Oldest') list=[...list].reverse();
+  else if(sort==='Most Liked') list=[...list].sort((a,b)=>(b.likes||0)-(a.likes||0));
+  render(list);
 }
