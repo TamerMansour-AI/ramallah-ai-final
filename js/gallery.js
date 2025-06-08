@@ -5,6 +5,9 @@ import { mountComments } from './comments.js';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let allItems=[];
+let currentList=[];
+let visible=0;
+const PAGE=20;
 const grid   = document.getElementById('gallery-grid');
 const modal  = document.getElementById('previewModal');
 const modalC = document.getElementById('modalContent');
@@ -37,7 +40,8 @@ async function loadGallery(){
 /* ------------ HELPERS ------------- */
 const imgExt=/\.(png|jpe?g|gif|webp|avif)(\?.*)?$/i;
 const isImg=u=>imgExt.test(u)||u.startsWith('https://cdn.midjourney.com');
-const ytThumb=u=>`https://img.youtube.com/vi/${u.split('v=')[1]?.slice(0,11)}/hqdefault.jpg`;
+const ytId=u=>(u.match(/(?:v=|youtu\.be\/)([\w-]{11})/)||[])[1];
+const ytThumb=u=>`https://img.youtube.com/vi/${ytId(u)}/hqdefault.jpg`;
 function thumb(it){
   if(it.type==='image' && it.link && isImg(it.link)) return it.link;
   if(it.type==='podcast') return 'assets/icons/podcast.svg';
@@ -65,18 +69,18 @@ function openModal(it){
   const likedKey=`liked_${it.id}`;
   let media='';
   if(it.type==='image' && isImg(it.link)){
-    media=`<img src="${it.link}" class="modal-media">`;
+    media=`<img src="${it.link}" class="modal-media" loading="lazy" alt="${it.title_en||''}">`;
   }else if(it.type==='podcast'){
     if(/\.(mp3|ogg)(\?.*)?$/i.test(it.link||''))
       media=`<audio controls class="modal-media" src="${it.link}"></audio>`;
     else if(it.link?.includes('youtu'))
-      media=`<iframe class="modal-media" src="https://www.youtube.com/embed/${it.link.split('v=')[1]?.slice(0,11)}" allowfullscreen></iframe>`;
+      media=`<iframe class="modal-media" src="https://www.youtube.com/embed/${ytId(it.link)}" allowfullscreen></iframe>`;
     else
       media=`<a href="${it.link}" target="_blank">Open link</a>`;
   }else if(it.type==='research' || /\.pdf(\?.*)?$/i.test(it.link||'')){
     media=`<iframe class="modal-media" src="${it.link}"></iframe>`;
   }else if(it.link?.includes('youtu')){
-    media=`<iframe class="modal-media" src="https://www.youtube.com/embed/${it.link.split('v=')[1]?.slice(0,11)}" allowfullscreen></iframe>`;
+    media=`<iframe class="modal-media" src="https://www.youtube.com/embed/${ytId(it.link)}" allowfullscreen></iframe>`;
   }else{
     media=`<a href="${it.link}" target="_blank">Open link</a>`;
   }
@@ -99,7 +103,7 @@ function card(it){
   const el=document.createElement('article');
   el.className='card';
   el.innerHTML=`
-    <img src="${thumb(it)}" loading="lazy">
+    <img src="${thumb(it)}" loading="lazy" alt="${it.title_en||''}" class="loading">
     <div class="inner">
       <h3>${it.title_en||'(untitled)'}</h3>
       <p>By ${
@@ -114,10 +118,22 @@ function card(it){
     </div>`;
   const likeBtn=el.querySelector('.like-btn');
   likeBtn.addEventListener('click',e=>{ e.stopPropagation(); like(it,likeBtn); });
+  const img=el.querySelector('img');
+  img.addEventListener('load',()=>img.classList.remove('loading'));
   el.addEventListener('click',()=>openModal(it));
   return el;
 }
-function render(list){ grid.innerHTML=''; list.forEach(it=>grid.appendChild(card(it))); }
+function render(list){
+  grid.innerHTML='';
+  currentList=list;
+  visible=0;
+  renderMore();
+}
+function renderMore(){
+  const slice=currentList.slice(visible,visible+PAGE);
+  slice.forEach(it=>grid.appendChild(card(it)));
+  visible+=slice.length;
+}
 function refresh(){
   const kw=(q.value||'').toLowerCase(), t=ft.value, s=ss.value;
   let list=allItems.filter(it=>
@@ -127,3 +143,10 @@ function refresh(){
   if(s==='Oldest') list=[...list].reverse();
   render(list);
 }
+
+window.addEventListener('scroll',()=>{
+  if(window.innerHeight+window.scrollY>document.body.offsetHeight-200){
+    renderMore();
+  }
+});
+
