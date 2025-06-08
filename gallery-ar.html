@@ -16,7 +16,7 @@
   <link rel="icon" href="images/favicon.png" type="image/png" />
   <script src="js/env.js"></script>
   <script defer src="js/main.js"></script>
-  <script type="module" src="js/gallery.js"></script>
+  <script src="js/gallery.js" defer></script>
 </head>
 
 <body>
@@ -43,59 +43,25 @@
     <div class="filter-bar">
       <input type="text" id="searchInput" placeholder="بحث بالعنوان أو اسم المبدع">
       <select id="filterType">
-        <option value="">كل الأنواع</option>
-        <option value="images">صور</option>
-        <option value="music">موسيقى</option>
-        <option value="videos">فيديو</option>
-        <option value="blogs">مدونات</option>
-        <option value="books">كتب</option>
+        <option value="All">كل الأنواع</option>
+        <option value="Images">صور</option>
+        <option value="Music">موسيقى</option>
+        <option value="Videos">فيديو</option>
+        <option value="Blogs">مدونات</option>
+        <option value="Books">كتب</option>
       </select>
       <select id="sortSelect">
-        <option value="newest">الأحدث</option>
-        <option value="oldest">الأقدم</option>
-        <option value="likes">الأكثر إعجاباً</option>
+        <option value="Newest">الأحدث</option>
+        <option value="Oldest">الأقدم</option>
+        <option value="Most Liked">الأكثر إعجاباً</option>
       </select>
     </div>
   </div>
 </section>
 
-<section class="gallery-section" id="images">
-  <div class="section-container glass container">
-    <h2>🖼️ الصور</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
+<div id="gallery-grid" class="gallery-grid"></div>
 
-<section class="gallery-section" id="music">
-  <div class="section-container glass container">
-    <h2>🎶 الموسيقى</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="videos">
-  <div class="section-container glass container">
-    <h2>🎥 الفيديو</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="blogs">
-  <div class="section-container glass container">
-    <h2>📝 المدونات والمقالات</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="books">
-  <div class="section-container glass container">
-    <h2>📚 الكتب والقصص</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<div id="scroll-sentinel"></div>
-<dialog id="preview-dialog"></dialog>
+<dialog id="previewModal"></dialog>
 
 <footer class="footer glass kufiyya-bg">
   <small>©2025 Ramallah.ai</small>

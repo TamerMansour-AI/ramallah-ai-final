@@ -21,7 +21,7 @@
   <link rel="icon" href="images/favicon.png" type="image/png" />
   <script src="js/env.js"></script>
   <script defer src="js/main.js"></script>
-  <script type="module" src="js/gallery.js"></script>
+  <script src="js/gallery.js" defer></script>
 </head>
 
 <body>
@@ -50,59 +50,25 @@
     <div class="filter-bar">
       <input type="text" id="searchInput" placeholder="Search by title or creator">
       <select id="filterType">
-        <option value="">All Types</option>
-        <option value="images">Images</option>
-        <option value="music">Music</option>
-        <option value="videos">Videos</option>
-        <option value="blogs">Blogs</option>
-        <option value="books">Books</option>
+        <option value="All">All Types</option>
+        <option value="Images">Images</option>
+        <option value="Music">Music</option>
+        <option value="Videos">Videos</option>
+        <option value="Blogs">Blogs</option>
+        <option value="Books">Books</option>
       </select>
       <select id="sortSelect">
-        <option value="newest">Newest</option>
-        <option value="oldest">Oldest</option>
-        <option value="likes">Most Liked</option>
+        <option value="Newest">Newest</option>
+        <option value="Oldest">Oldest</option>
+        <option value="Most Liked">Most Liked</option>
       </select>
     </div>
   </div>
 </section>
 
-<section class="gallery-section" id="images">
-  <div class="section-container glass container">
-    <h2>🖼️ Images</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
+<div id="gallery-grid" class="gallery-grid"></div>
 
-<section class="gallery-section" id="music">
-  <div class="section-container glass container">
-    <h2>🎶 Music</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="videos">
-  <div class="section-container glass container">
-    <h2>🎥 Videos</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="blogs">
-  <div class="section-container glass container">
-    <h2>📝 Blogs & Articles</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="books">
-  <div class="section-container glass container">
-    <h2>📚 Books & Stories</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<div id="scroll-sentinel"></div>
-<dialog id="preview-dialog"></dialog>
+<dialog id="previewModal"></dialog>
 
 <footer class="footer glass kufiyya-bg">
   <small>©2025 Ramallah.ai</small>
