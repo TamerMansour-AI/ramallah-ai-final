@@ -2,10 +2,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&family=Inter:wght@400;700&display=swap');
 
 :root{
-  --background:#111;
+  --background:#232323;
   --accent:#04A15A;
   --accent-dark:#046936;
-  --text:#f1f1f1;
+  --text:#f6f3ec;
   --radius:20px;
   --shadow:0 4px 24px rgba(0,0,0,.5);
   --transition:.4s cubic-bezier(.77,0,.18,1);
@@ -263,6 +263,7 @@ html[dir="rtl"] .creator-socials a{
 .share-icons{display:flex;gap:.5rem;margin-top:.5rem;align-items:center}
 .share-icons button{background:none;border:none;cursor:pointer;font-size:1.2rem;padding:.2rem}
 .share-icons button:hover{opacity:.7}
+html[dir="rtl"] .share-icons{flex-direction:row-reverse}
 /* BLOG COMPONENTS */
 .tag-filter{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .tag-filter button{padding:.3rem .8rem;border-radius:var(--radius);border:1px solid #555;background:none;color:var(--text);cursor:pointer}
