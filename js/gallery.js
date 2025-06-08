@@ -33,10 +33,17 @@ async function loadGallery(){
 }
 
 function fallbackThumb(it){
+  // If an image row and link looks like a direct image URL → use it
+  if(it.type === 'image' && it.link &&
+     /(\.png|jpe?g|gif|webp|avif)$/i.test(it.link)){
+    return it.link;
+  }
+  // If YouTube link
   if(it.link?.includes('youtu')){
     const id = it.link.split('v=')[1]?.slice(0,11);
     return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
   }
+  // Fallback generic icon
   return 'assets/icons/link.svg';
 }
 function buildCard(it){
