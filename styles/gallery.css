@@ -70,3 +70,32 @@
 .c-item{background:#222;padding:6px;border-radius:6px;margin-bottom:4px}
 #comments textarea,#comments input{width:100%;margin-bottom:4px}
 #comments button{background:#3b7d4a;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:.85rem}
+/* centred modal */
+#previewModal{
+  padding:0;border:none;background:transparent;
+  width:100vw;height:100vh;
+  display:flex;align-items:center;justify-content:center;
+}
+#previewModal::backdrop{background:rgba(0,0,0,.8)}
+.modal-media{max-width:90vw;max-height:80vh;object-fit:contain}
+#previewModal .like-btn{margin-top:10px}
+
+/* comments panel */
+#comments{
+  margin-top:12px;background:#191919;padding:10px;border-radius:8px;
+  width:100%;max-width:640px;box-shadow:0 0 6px rgba(0,0,0,.6);font-size:.9rem;
+}
+#comments h4{margin:0 0 8px;font-size:1rem;color:#f1f1f1}
+.c-list{max-height:28vh;overflow-y:auto;margin-bottom:8px;padding-right:4px}
+.c-item{background:#262626;padding:6px 8px;border-radius:6px;margin-bottom:6px}
+.c-item strong{color:#3b7d4a}.c-item small{color:#888;margin-left:4px;font-size:.7rem}
+#comments form{display:flex;flex-direction:column;gap:6px}
+#comments input,#comments textarea{
+  width:100%;background:#111;border:1px solid #333;color:#eee;border-radius:4px;padding:6px
+}
+#comments button{
+  align-self:flex-end;background:#3b7d4a;border:none;color:#fff;
+  padding:6px 16px;border-radius:4px;cursor:pointer;font-size:.85rem;
+  transition:.2s background;
+}
+#comments button:hover{background:#469b57}
