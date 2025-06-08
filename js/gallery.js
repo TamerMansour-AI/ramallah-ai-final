@@ -1,163 +1,70 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
-let allItems = []
+let allItems = [];
+const wrap = document.getElementById('gallery-grid');
 
-function isArabic () {
-  return document.documentElement.lang === 'ar'
-}
+document.addEventListener('DOMContentLoaded', loadGallery);
 
-async function loadGallery () {
+async function loadGallery() {
   const { data, error } = await supabase
     .from('submissions')
-    .select(`
-      id,
-      title_en,
-      desc_en,
-      type,
-      thumb_url,
-      file_path,
-      link,
-      creator_name,
-      creator_slug,
-      likes,
-      created_at
-    `)
-    .eq('status', 'approved')
+    .select(`id,title_en,desc_en,type,link,thumb_url,file_path,
+             creator_name,creator_slug,likes,created_at,status`)
+    .eq('status', 'approved');
+  if (error) { console.error(error); return; }
 
-  if (error) return console.error(error)
-  allItems = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-  renderGallery(allItems)
-  console.info('Loaded', allItems.length, 'items')
+  // newest first client-side
+  allItems = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  renderGallery(allItems);
+  console.info('Loaded', allItems.length, 'items');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadGallery()
-  const s = document.getElementById('searchInput') || document.getElementById('searchInput-ar')
-  const f = document.getElementById('filterType') || document.getElementById('filterType-ar')
-  const sort = document.getElementById('sortSelect') || document.getElementById('sortSelect-ar')
-  if (s) s.addEventListener('input', filterRender)
-  if (f) f.addEventListener('change', filterRender)
-  if (sort) sort.addEventListener('change', filterRender)
-})
-
-function filterRender () {
-  const text = (document.getElementById('searchInput')?.value || document.getElementById('searchInput-ar')?.value || '').toLowerCase()
-  const typeVal = (document.getElementById('filterType')?.value || document.getElementById('filterType-ar')?.value || '')
-  const sortVal = (document.getElementById('sortSelect')?.value || document.getElementById('sortSelect-ar')?.value || 'newest')
-
-  let items = allItems.filter(it => {
-    const titleField = isArabic() ? it.title_ar : it.title_en
-    const matchText = (titleField || '').toLowerCase().includes(text) ||
-      (it.creator_name || '').toLowerCase().includes(text)
-    const matchType = !typeVal || typeVal === 'All' ? true : it.type === typeVal
-    return matchText && matchType
-  })
-
-  if (sortVal === 'oldest') {
-    items.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-  } else if (sortVal === 'likes') {
-    items.sort((a, b) => (b.likes || 0) - (a.likes || 0))
-  } else {
-    items.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+function thumbFor(it) {
+  if (it.thumb_url) return it.thumb_url;
+  if (it.link?.includes('youtu')) {
+    const id = it.link.split('v=')[1]?.substring(0, 11);
+    return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
   }
-
-  renderGallery(items)
+  return 'assets/icons/link.svg';
 }
 
-const sectionEls = {
-  image: document.querySelector('#images .gallery-grid'),
-  music: document.querySelector('#music .gallery-grid'),
-  video: document.querySelector('#videos .gallery-grid'),
-  blog: document.querySelector('#blogs .gallery-grid'),
-  book: document.querySelector('#books .gallery-grid')
+function buildCard(it) {
+  const card = document.createElement('article');
+  card.className = 'card';
+  card.innerHTML = `
+    <img loading="lazy" src="${thumbFor(it)}" alt="${it.title_en || 'AI work'}">
+    <h3>${it.title_en || '(untitled)'}</h3>
+    <p class="creator">By ${it.creator_name || 'Unknown'}</p>
+    <span class="badge">${it.type.toUpperCase()}</span>`;
+  return card;
 }
 
-function renderGallery (list) {
-  Object.values(sectionEls).forEach(c => { if (c) c.innerHTML = '' })
-  list.forEach(item => {
-    const cont = sectionEls[item.type]
-    if (!cont) return
-    cont.appendChild(buildCard(item))
-  })
+function renderGallery(list) {
+  wrap.innerHTML = '';
+  list.forEach(it => wrap.appendChild(buildCard(it)));
 }
 
-function youtubeThumb (url) {
-  const m = url.match(/(?:v=|be\/)([\w-]{11})/)
-  return m ? `https://img.youtube.com/vi/${m[1]}/hqdefault.jpg` : 'assets/icons/link.svg'
+/* =========  search / filter / sort  ========= */
+const q  = document.getElementById('searchInput');
+const ft = document.getElementById('filterType');
+const ss = document.getElementById('sortSelect');
+[q, ft, ss].forEach(el => el?.addEventListener('input', filterRender));
+
+function filterRender() {
+  const kw   = (q?.value || '').toLowerCase();
+  const type = ft?.value || 'All';
+  const sort = ss?.value || 'Newest';
+
+  let list = allItems.filter(it =>
+      (type === 'All' || it.type === type) &&
+      ((it.title_en || '').toLowerCase().includes(kw) ||
+       (it.creator_name || '').toLowerCase().includes(kw)));
+
+  if (sort === 'Oldest') {
+    list = [...list].reverse();
+  } else if (sort === 'Most Liked') {
+    list = [...list].sort((a, b) => (b.likes || 0) - (a.likes || 0));
+  }
+  renderGallery(list);
 }
-
-function buildCard (item) {
-  const card = document.createElement('article')
-  card.className = 'gallery-card'
-
-  let thumb = item.thumb_url
-  if (!thumb) {
-    if (item.link && item.link.includes('youtu')) {
-      thumb = youtubeThumb(item.link)
-    } else {
-      thumb = 'assets/icons/link.svg'
-    }
-  }
-  if (thumb) {
-    const img = document.createElement('img')
-    img.src = thumb
-    img.alt = item.title_en || item.title_ar || ''
-    img.loading = 'lazy'
-    card.appendChild(img)
-  }
-
-  if (item.creator_name) {
-    const meta = document.createElement('div')
-    meta.className = 'gallery-meta'
-    meta.textContent = isArabic() ? 'بواسطة ' : 'By '
-    const a = document.createElement('a')
-    a.href = `creator.html?id=${item.creator_slug}`
-    a.textContent = item.creator_name
-    meta.appendChild(a)
-    card.appendChild(meta)
-  }
-
-  const titleField = isArabic() ? item.title_ar : item.title_en
-  if (titleField) {
-    const t = document.createElement('div')
-    t.className = 'gallery-title'
-    t.textContent = titleField
-    card.appendChild(t)
-  }
-
-  const likeBox = document.createElement('div')
-  likeBox.className = 'like-box'
-  const btn = document.createElement('button')
-  btn.className = 'like-btn'
-  btn.textContent = '👍'
-  const cnt = document.createElement('span')
-  cnt.className = 'like-count'
-  cnt.textContent = item.likes || 0
-  if (localStorage.getItem('liked_' + item.id)) {
-    btn.classList.add('liked')
-  }
-  btn.addEventListener('click', async () => {
-    if (btn.classList.contains('liked')) return
-    const { error } = await supabase.rpc('increment_likes', { id: item.id })
-    if (!error) {
-      cnt.textContent = parseInt(cnt.textContent) + 1
-      btn.classList.add('liked')
-      localStorage.setItem('liked_' + item.id, '1')
-    }
-  })
-  likeBox.appendChild(btn)
-  likeBox.appendChild(cnt)
-  card.appendChild(likeBox)
-
-  if (item.link && item.type !== 'image') {
-    const a = document.createElement('a')
-    a.href = item.link
-    a.target = '_blank'
-    a.textContent = 'Open'
-    card.appendChild(a)
-  }
-
-  return card
-}
-
