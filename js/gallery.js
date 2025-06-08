@@ -7,14 +7,22 @@ const supabase = createClient(
 );
 
 let visitorIP = '';
+let visitorHash = '';
+async function hashIP(ip) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
 async function fetchIP() {
   try {
     const res = await fetch('https://api.ipify.org?format=json');
     const json = await res.json();
     visitorIP = json.ip;
+    visitorHash = await hashIP(visitorIP);
   } catch {}
 }
-fetchIP();
+const fetchIPPromise = fetchIP();
 
 // الأقسام الظاهرة فى الـ HTML
 const sections = ['images', 'music', 'videos', 'blogs', 'books'];
@@ -43,7 +51,7 @@ function getFallbackThumb(link) {
   if (!link) return '';
   const yt = link.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w-]{11})/);
   if (yt) return `https://img.youtube.com/vi/${yt[1]}/hqdefault.jpg`;
-  return '/assets/icons/link.svg';
+  return 'assets/icons/link.svg';
 }
 const isArabic = document.documentElement.lang === 'ar';
 
@@ -116,17 +124,21 @@ async function fetchProfiles() {
   }
 }
 
+let likedItems = new Set();
 async function fetchLikes(ids) {
   likeCounts = {};
+  likedItems = new Set();
   if (!ids.length) return;
-  const slugs = ids.map((id) => `item-${id}`);
   const { data } = await supabase
     .from('likes')
-    .select('slug,count')
-    .in('slug', slugs);
+    .select('submission_id, ip_hash')
+    .in('submission_id', ids);
   if (data) {
     data.forEach((row) => {
-      likeCounts[row.slug] = row.count;
+      likeCounts[row.submission_id] = (likeCounts[row.submission_id] || 0) + 1;
+      if (visitorHash && row.ip_hash === visitorHash) {
+        likedItems.add(row.submission_id);
+      }
     });
   }
 }
@@ -137,7 +149,7 @@ async function fetchData() {
   shuffleEnabled = sortOrder === 'random';
   let query = supabase
     .from('submissions')
-    .select('*')
+    .select('*, creators(slug)')
     .eq('status', 'approved');
 
   if (sortOrder === 'newest') {
@@ -156,18 +168,18 @@ async function fetchData() {
     return;
   }
 
-  console.log('✅ Fetched data from Supabase', data);
 
   await fetchLikes(data.map((i) => i.id));
 
   if (sortOrder === 'likes') {
-    data.sort((a, b) => (likeCounts[`item-${b.id}`] || 0) - (likeCounts[`item-${a.id}`] || 0));
+    data.sort((a, b) => (likeCounts[b.id] || 0) - (likeCounts[a.id] || 0));
   }
 
   // 🧹 تنظيف البيانات: فقط اللي عنده عنوان وصورة (أو thumb)
-  allItems = data.filter(item => {
+  allItems = data.filter((item) => {
     const hasTitle = item.title || item.title_en || item.title_ar;
-    const hasImage = item.thumb || (item.type === 'image' && item.link);
+    const thumb = item.thumb_url || item.thumb;
+    const hasImage = thumb || (item.type === 'image' && item.link);
     return hasTitle && hasImage;
   });
 
@@ -217,7 +229,8 @@ function renderFiltered(reset = false) {
     if (!container) return;
     hasData[section] = true;
 
-    const imgSrc = item.type === 'image' ? item.link : item.thumb || getFallbackThumb(item.link);
+    const thumb = item.thumb_url || item.thumb;
+    const imgSrc = item.type === 'image' ? item.link : thumb || getFallbackThumb(item.link);
     const card = document.createElement('div');
     card.className = 'gallery-card show';
     card.dataset.id = item.id;
@@ -247,7 +260,10 @@ function renderFiltered(reset = false) {
         }
       }
       if (!slug) {
-        slug = creatorsMap[creatorName.toLowerCase()];
+        slug =
+          (item.creators && item.creators.slug) ||
+          item.creator_slug ||
+          creatorsMap[creatorName.toLowerCase()];
         if (slug) {
           a.href = `creator${isArabic ? '-ar' : ''}.html?id=${encodeURIComponent(slug)}`;
         } else {
@@ -278,7 +294,7 @@ function renderFiltered(reset = false) {
     descDiv.textContent = item.desc_en || item.desc_ar || '';
     card.appendChild(descDiv);
 
-    const slug = `item-${item.id}`;
+    const slug = item.id;
     let count = likeCounts[slug] || 0;
     const likeBox = document.createElement('div');
     likeBox.className = 'like-box';
@@ -291,21 +307,24 @@ function renderFiltered(reset = false) {
     likeBox.appendChild(likeBtn);
     likeBox.appendChild(countSpan);
     const likedKey = visitorIP ? `liked_${slug}_${visitorIP}` : `liked_${slug}`;
-    if (localStorage.getItem(likedKey)) {
+    if (localStorage.getItem(likedKey) || likedItems.has(slug)) {
       likeBtn.disabled = true;
+      likeBtn.classList.add('liked');
       likeBtn.title = 'Liked ❤️';
     }
     likeBtn.addEventListener('click', async () => {
-      if (localStorage.getItem(likedKey)) return;
+      if (localStorage.getItem(likedKey) || likedItems.has(slug)) return;
       const { error } = await supabase
         .from('likes')
-        .upsert({ slug, count: count + 1 }, { onConflict: 'slug' });
+        .insert({ submission_id: slug, ip_hash: visitorHash });
       if (!error) {
         count++;
         likeCounts[slug] = count;
         countSpan.textContent = count;
         likeBtn.disabled = true;
+        likeBtn.classList.add('liked');
         likeBtn.title = 'Liked ❤️';
+        likedItems.add(slug);
         localStorage.setItem(likedKey, '1');
       }
     });
@@ -351,7 +370,7 @@ function renderFiltered(reset = false) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  fetchData();
+  fetchIPPromise.then(fetchData);
 
   const search = document.getElementById('search-input');
   const filter = document.getElementById('type-filter');
@@ -431,9 +450,9 @@ function openModal(item) {
     media = document.createElement('audio');
     media.controls = true;
     media.src = item.link;
-  } else if (item.thumb) {
+  } else if (item.thumb_url || item.thumb) {
     media = document.createElement('img');
-    media.src = item.thumb;
+    media.src = item.thumb_url || item.thumb;
     media.alt = item.title || '';
   }
   if (media) media.className = 'modal-media';
@@ -459,7 +478,10 @@ function openModal(item) {
       if (slug) a.href = `profile.html?slug=${encodeURIComponent(slug)}`;
     }
     if (!slug) {
-      slug = creatorsMap[creatorName.toLowerCase()];
+      slug =
+        (item.creators && item.creators.slug) ||
+        item.creator_slug ||
+        creatorsMap[creatorName.toLowerCase()];
       if (slug) {
         a.href = `creator${isArabic ? '-ar' : ''}.html?id=${encodeURIComponent(slug)}`;
       } else {

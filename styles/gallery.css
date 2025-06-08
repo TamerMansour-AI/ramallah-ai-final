@@ -242,6 +242,11 @@
   cursor: pointer;
 }
 
+.like-btn.liked {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 @media (max-width: 600px) {
   .gallery-modal {
     width: 100%;
