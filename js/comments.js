@@ -23,12 +23,20 @@ export async function mountComments(wrapper, submissionId){
       .select('name,body,created_at')
       .eq('submission_id', submissionId)
       .order('created_at','asc');
-    listEl.innerHTML = (data||[]).map(c=>`
+
+    if(!data || data.length===0){
+      listEl.innerHTML = '<em style="color:#777">No comments yet…</em>';
+      return;
+    }
+
+    listEl.innerHTML = data.map(c=>`
       <div class="c-item">
         <strong>${c.name}</strong>
         <small>${new Date(c.created_at).toLocaleString()}</small>
         <p>${c.body}</p>
       </div>`).join('');
+    /* scroll to newest */
+    listEl.scrollTop = listEl.scrollHeight;
   }
 
   formEl.addEventListener('submit', async e=>{
