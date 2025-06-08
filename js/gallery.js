@@ -240,9 +240,10 @@ function renderFiltered(reset = false) {
 
     const thumb = item.thumb_url || item.thumb;
     const imgSrc = item.type === 'image' ? item.link : thumb || getFallbackThumb(item.link);
-    const card = document.createElement('div');
+    const card = document.createElement('article');
     card.className = 'gallery-card show';
     card.dataset.id = item.id;
+    card.tabIndex = 0;
 
     if (imgSrc) {
       const img = document.createElement('img');
@@ -456,6 +457,22 @@ function openModal(item) {
 }
 
 document.addEventListener('click', function (e) {
+  const card = e.target.closest('.gallery-card');
+  if (!card) return;
+  if (
+    e.target.closest('a') ||
+    e.target.closest('.like-btn') ||
+    e.target.closest('.share-icons')
+  ) {
+    return;
+  }
+  const id = parseInt(card.dataset.id, 10);
+  const item = allItems.find((i) => i.id === id);
+  if (item) openModal(item);
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter') return;
   const card = e.target.closest('.gallery-card');
   if (!card) return;
   if (
