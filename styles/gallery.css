@@ -63,3 +63,10 @@
   margin-top:4px;
 }
 .like-btn.liked{opacity:.4;pointer-events:none}
+
+/* comments UI */
+#comments h4{margin:8px 0 4px}
+.c-list{max-height:28vh;overflow-y:auto;margin-bottom:6px}
+.c-item{background:#222;padding:6px;border-radius:6px;margin-bottom:4px}
+#comments textarea,#comments input{width:100%;margin-bottom:4px}
+#comments button{background:#3b7d4a;color:#fff;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:.85rem}
