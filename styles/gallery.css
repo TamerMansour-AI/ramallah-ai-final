@@ -40,3 +40,25 @@
   position:absolute;top:6px;right:10px;font-size:24px;
   background:none;border:none;color:#fff;cursor:pointer;
 }
+/* center dialog content */
+#previewModal{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  background:#000;
+  border:none;
+  border-radius:8px;
+}
+.like-btn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:.9rem;
+  color:#fcb400;
+  display:flex;
+  align-items:center;
+  gap:3px;
+  margin-top:4px;
+}
+.like-btn.liked{opacity:.4;pointer-events:none}
