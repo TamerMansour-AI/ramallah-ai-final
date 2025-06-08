@@ -26,12 +26,13 @@
 .card img{
   height: 200px;
   object-fit: cover;
+  width:100%;
 }
+.card img[src$='.svg']{object-fit:contain}
 .card h3{margin:8px 0 4px;font-size:1rem}
 .card p{margin:0 0 4px;font-size:.85rem;color:#bbb}
 .controls{margin-top:1.5rem}
 .card .inner{padding:8px}
-.card img{height:200px;object-fit:cover;width:100%}
 /* dialog – hidden when not [open] */
 #previewModal{
   display:none;                     /* default (closed) */
