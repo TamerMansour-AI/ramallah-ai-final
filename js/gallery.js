@@ -40,8 +40,9 @@ let allItems = [];
 let creatorsMap = {};
 let profilesMap = {};
 const batchSize = 12;
-let itemsShown = batchSize;
-let shuffleEnabled = false;
+let offset = 0;
+let loading = false;
+let reachedEnd = false;
 let sortOrder = 'newest';
 let likeCounts = {};
 const params = new URLSearchParams(window.location.search);
@@ -143,10 +144,18 @@ async function fetchLikes(ids) {
   }
 }
 
-async function fetchData() {
+async function fetchData(reset = false) {
+  if (loading || (reachedEnd && !reset)) return;
+  loading = true;
+  if (reset) {
+    offset = 0;
+    reachedEnd = false;
+    allItems = [];
+  }
+
   await fetchCreators();
   await fetchProfiles();
-  shuffleEnabled = sortOrder === 'random';
+
   let query = supabase
     .from('submissions')
     .select('*, creators(slug)')
@@ -154,40 +163,44 @@ async function fetchData() {
 
   if (sortOrder === 'newest') {
     query = query.order('id', { ascending: false });
-  } else if (sortOrder === 'random') {
-    shuffleEnabled = true;
-    query = query.order('id');
+  } else if (sortOrder === 'oldest') {
+    query = query.order('id', { ascending: true });
   } else if (sortOrder === 'likes') {
     query = query.order('id', { ascending: false });
   }
 
+  query = query.range(offset, offset + batchSize - 1);
+
   const { data, error } = await query;
 
-  if (error) {
+  if (error || !data) {
     console.error('❌ Error loading data:', error);
+    loading = false;
     return;
   }
 
-
   await fetchLikes(data.map((i) => i.id));
 
-  if (sortOrder === 'likes') {
-    data.sort((a, b) => (likeCounts[b.id] || 0) - (likeCounts[a.id] || 0));
-  }
-
-  // 🧹 تنظيف البيانات: فقط اللي عنده عنوان وصورة (أو thumb)
-  allItems = data.filter((item) => {
+  let list = data.filter((item) => {
     const hasTitle = item.title || item.title_en || item.title_ar;
     const thumb = item.thumb_url || item.thumb;
     const hasImage = thumb || (item.type === 'image' && item.link);
     return hasTitle && hasImage;
   });
 
+  if (sortOrder === 'likes') {
+    list.sort((a, b) => (likeCounts[b.id] || 0) - (likeCounts[a.id] || 0));
+  }
+
+  allItems = allItems.concat(list);
+  offset += data.length;
+  if (data.length < batchSize) reachedEnd = true;
+
   renderFiltered(true);
+  loading = false;
 }
 
 function renderFiltered(reset = false) {
-  if (reset) itemsShown = batchSize;
 
   const searchValue =
     document.getElementById('search-input')?.value?.toLowerCase() || '';
@@ -210,11 +223,7 @@ function renderFiltered(reset = false) {
     return matchesType && matchesSearch && matchesCreatorParam;
   });
 
-  if (shuffleEnabled) {
-    filtered = filtered.sort(() => Math.random() - 0.5);
-  }
-
-  const pageItems = filtered.slice(0, itemsShown);
+  const pageItems = filtered;
 
   const hasData = {};
   sections.forEach((s) => {
@@ -362,81 +371,49 @@ function renderFiltered(reset = false) {
     msg.remove();
   }
 
-  const loadBtn = document.getElementById('load-more-btn');
-  if (loadBtn) {
-    if (itemsShown >= filtered.length) loadBtn.style.display = 'none';
-    else loadBtn.style.display = 'block';
-  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  fetchIPPromise.then(fetchData);
+  fetchIPPromise.then(() => fetchData(true));
 
   const search = document.getElementById('search-input');
   const filter = document.getElementById('type-filter');
+  const sortSelect = document.getElementById('sort');
+  const sentinel = document.getElementById('scroll-sentinel');
 
-  const sortSelect = document.getElementById('sort-order');
-  const loadMoreBtn = document.getElementById('load-more-btn');
-
-  if (search) search.addEventListener('input', () => renderFiltered(true));
-  if (filter) filter.addEventListener('change', () => renderFiltered(true));
+  const resetAndLoad = () => fetchData(true);
+  if (search) search.addEventListener('input', resetAndLoad);
+  if (filter) filter.addEventListener('change', resetAndLoad);
   if (sortSelect)
     sortSelect.addEventListener('change', () => {
       sortOrder = sortSelect.value;
-      shuffleEnabled = sortOrder === 'random';
-      fetchData();
+      resetAndLoad();
     });
-  if (loadMoreBtn)
-    loadMoreBtn.addEventListener('click', () => {
-      itemsShown += batchSize;
-      renderFiltered();
-    });
+  if (sentinel) {
+    const obs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) fetchData();
+    }, { rootMargin: '200px' });
+    obs.observe(sentinel);
+  }
 });
 
-let modalOverlay;
+let previewDialog;
 
 function closeModal() {
-  if (modalOverlay) {
-    modalOverlay.remove();
-    modalOverlay = null;
-    document.removeEventListener('keydown', escHandler);
-  }
-}
-
-function escHandler(e) {
-  if (e.key === 'Escape') closeModal();
-}
-
-async function loadComments(itemId, list) {
-  const { data } = await supabase
-    .from('comments')
-    .select('name, comment, timestamp')
-    .eq('item_id', itemId)
-    .order('timestamp', { ascending: false })
-    .limit(3);
-  list.innerHTML = '';
-  if (data) {
-    data.forEach((c) => {
-      const li = document.createElement('li');
-      li.textContent = `${c.name}: ${c.comment}`;
-      list.appendChild(li);
-    });
-  }
+  if (previewDialog) previewDialog.close();
 }
 
 function openModal(item) {
-  closeModal();
-  modalOverlay = document.createElement('div');
-  modalOverlay.className = 'modal-overlay';
-  const modal = document.createElement('div');
-  modal.className = 'gallery-modal';
+  if (!previewDialog) {
+    previewDialog = document.getElementById('preview-dialog');
+    if (!previewDialog) {
+      previewDialog = document.createElement('dialog');
+      previewDialog.id = 'preview-dialog';
+      document.body.appendChild(previewDialog);
+    }
+  }
 
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'modal-close';
-  closeBtn.textContent = '×';
-  closeBtn.addEventListener('click', closeModal);
-  modal.appendChild(closeBtn);
-
+  previewDialog.innerHTML = '';
   let media;
   if (item.type === 'image' && item.link) {
     media = document.createElement('img');
@@ -450,97 +427,32 @@ function openModal(item) {
     media = document.createElement('audio');
     media.controls = true;
     media.src = item.link;
-  } else if (item.thumb_url || item.thumb) {
-    media = document.createElement('img');
-    media.src = item.thumb_url || item.thumb;
-    media.alt = item.title || '';
+  } else if (item.link) {
+    media = document.createElement('iframe');
+    media.src = item.link;
+    media.allowFullscreen = true;
   }
-  if (media) media.className = 'modal-media';
-  if (media) modal.appendChild(media);
-
+  if (media) {
+    media.className = 'modal-media';
+    previewDialog.appendChild(media);
+  }
   if (item.title) {
-    const h3 = document.createElement('h3');
-    h3.textContent = item.title;
-    modal.appendChild(h3);
-  }
-
-  const creatorName = item.creator_name || item.creator;
-  if (creatorName) {
     const p = document.createElement('p');
-    p.className = 'modal-creator';
-    p.textContent = isArabic ? 'بواسطة ' : 'By ';
-    const b = document.createElement('b');
-    const a = document.createElement('a');
-    a.textContent = creatorName;
-    let slug = null;
-    if (item.profile_id) {
-      slug = profilesMap[item.profile_id];
-      if (slug) a.href = `profile.html?slug=${encodeURIComponent(slug)}`;
-    }
-    if (!slug) {
-      slug =
-        (item.creators && item.creators.slug) ||
-        item.creator_slug ||
-        creatorsMap[creatorName.toLowerCase()];
-      if (slug) {
-        a.href = `creator${isArabic ? '-ar' : ''}.html?id=${encodeURIComponent(slug)}`;
-      } else {
-        a.href = `gallery${isArabic ? '-ar' : ''}.html?creator=${encodeURIComponent(creatorName)}`;
-      }
-    }
-    b.appendChild(a);
-    p.appendChild(b);
-    modal.appendChild(p);
+    p.textContent = item.title;
+    previewDialog.appendChild(p);
   }
 
-  if (item.desc_en || item.desc_ar) {
-    const p = document.createElement('p');
-    p.className = 'modal-desc';
-    p.textContent = item.desc_en || item.desc_ar;
-    modal.appendChild(p);
-  }
-
-  if (item.link && item.type !== 'image') {
-    const a = document.createElement('a');
-    a.href = item.link;
-    a.target = '_blank';
-    a.className = 'modal-view-btn';
-    a.textContent = isArabic ? 'مشاهدة العمل' : 'View Work';
-    modal.appendChild(a);
-  }
-
-  // Comments
-  const commentBox = document.createElement('div');
-  commentBox.className = 'comment-box';
-  commentBox.innerHTML = `\n    <form class="comment-form">\n      <input name="name" placeholder="${isArabic ? 'الاسم' : 'Name'}" required>\n      <textarea name="comment" placeholder="${isArabic ? 'تعليق' : 'Comment'}" required></textarea>\n      <button type="submit">${isArabic ? 'إرسال' : 'Send'}</button>\n    </form>\n    <ul class="comments-list"></ul>\n  `;
-  modal.appendChild(commentBox);
-
-  modalOverlay.appendChild(modal);
-  document.body.appendChild(modalOverlay);
-
-  modalOverlay.addEventListener('click', (e) => {
-    if (e.target === modalOverlay) closeModal();
+  previewDialog.addEventListener('click', (e) => {
+    if (e.target === previewDialog) closeModal();
   });
-  document.addEventListener('keydown', escHandler);
-
-  const listEl = commentBox.querySelector('.comments-list');
-  loadComments(item.id, listEl);
-  const form = commentBox.querySelector('form');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const name = form.name.value.trim();
-    const text = form.comment.value.trim();
-    if (!name || !text) return;
-    const { error } = await supabase.from('comments').insert({
-      item_id: item.id,
-      name,
-      comment: text,
-    });
-    if (!error) {
-      form.reset();
-      loadComments(item.id, listEl);
-    }
-  });
+  document.addEventListener(
+    'keydown',
+    (e) => {
+      if (e.key === 'Escape') closeModal();
+    },
+    { once: true }
+  );
+  previewDialog.showModal();
 }
 
 document.addEventListener('click', function (e) {

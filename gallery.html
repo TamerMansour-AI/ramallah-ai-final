@@ -57,11 +57,11 @@
         <option value="blogs">Blogs</option>
         <option value="books">Books</option>
       </select>
-        <select id="sort-order">
-          <option value="newest">Newest First</option>
-          <option value="likes">Most Liked</option>
-          <option value="random">Random</option>
-        </select>
+      <select id="sort">
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+        <option value="likes">Most Liked</option>
+      </select>
     </div>
   </div>
 </section>
@@ -101,9 +101,8 @@
   </div>
 </section>
 
-<div id="load-more-container">
-  <button id="load-more-btn" class="cta-btn">Load More</button>
-</div>
+<div id="scroll-sentinel"></div>
+<dialog id="preview-dialog"></dialog>
 
 <footer class="footer glass kufiyya-bg">
   <small>©2025 Ramallah.ai</small>

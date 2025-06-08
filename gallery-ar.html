@@ -50,7 +50,11 @@
         <option value="blogs">مدونات</option>
         <option value="books">كتب</option>
       </select>
-      <label class="shuffle-toggle"><input type="checkbox" id="shuffle-toggle"> عشوائي</label>
+      <select id="sort">
+        <option value="newest">الأحدث</option>
+        <option value="oldest">الأقدم</option>
+        <option value="likes">الأكثر إعجاباً</option>
+      </select>
     </div>
   </div>
 </section>
@@ -90,9 +94,8 @@
   </div>
 </section>
 
-<div id="load-more-container">
-  <button id="load-more-btn" class="cta-btn">تحميل المزيد</button>
-</div>
+<div id="scroll-sentinel"></div>
+<dialog id="preview-dialog"></dialog>
 
 <footer class="footer glass kufiyya-bg">
   <small>©2025 Ramallah.ai</small>

@@ -219,6 +219,19 @@
 }
 .modal-media {max-height: 400px; object-fit: contain;}
 
+#preview-dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+#preview-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.85);
+}
+#preview-dialog .modal-media {
+  max-width: 90vw;
+  max-height: 80vh;
+}
+
 .modal-view-btn {
   display: inline-block;
   margin-top: 1rem;
