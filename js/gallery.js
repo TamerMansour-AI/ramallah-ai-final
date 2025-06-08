@@ -10,6 +10,7 @@ const modal  = document.getElementById('previewModal');
 const modalC = document.getElementById('modalContent');
 document.getElementById('closeModal')?.addEventListener('click',()=>modal.close());
 modal.addEventListener('click',e=>{if(e.target===modal) modal.close();});
+modal.addEventListener('close', ()=>{ modalC.innerHTML=''; });   // clears stuck content
 
 const q=document.getElementById('searchInput'),
       ft=document.getElementById('filterType'),
@@ -18,31 +19,32 @@ const q=document.getElementById('searchInput'),
 
 document.addEventListener('DOMContentLoaded',loadGallery);
 
+/* ------------ DB LOAD ------------- */
 async function loadGallery(){
   const { data:subs } = await supabase
-      .from('submissions')
-      .select('id,title_en,type,link,creator_name,creator_slug,status,created_at')
-      .eq('status','approved');
+    .from('submissions')
+    .select('id,title_en,type,link,creator_name,creator_slug,status,created_at')
+    .eq('status','approved');
 
   const { data:lk } = await supabase.from('likes').select('slug,count');
   const likeMap = Object.fromEntries((lk||[]).map(r=>[r.slug,r.count]));
 
-  allItems = subs.map(x=>({...x,likes:likeMap[x.id]||0}))
-                 .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  allItems=subs.map(x=>({...x,likes:likeMap[x.id]||0}))
+               .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
   render(allItems);
 }
 
-/* helpers */
+/* ------------ HELPERS ------------- */
 const imgExt=/\.(png|jpe?g|gif|webp|avif)(\?.*)?$/i;
 const isImg=u=>imgExt.test(u)||u.startsWith('https://cdn.midjourney.com');
 const ytThumb=u=>`https://img.youtube.com/vi/${u.split('v=')[1]?.slice(0,11)}/hqdefault.jpg`;
 function thumb(it){
-  if(it.type==='image'&&it.link&&isImg(it.link)) return it.link;
+  if(it.type==='image' && it.link && isImg(it.link)) return it.link;
   if(it.link?.includes('youtu')) return ytThumb(it.link);
   return 'assets/icons/link.svg';
 }
 
-/* like */
+/* ------------ LIKE ------------ */
 async function like(it,btn){
   const key=`liked_${it.id}`;
   if(localStorage.getItem(key)) return;
@@ -56,29 +58,29 @@ async function like(it,btn){
   localStorage.setItem(key,'1');
 }
 
-/* modal */
+/* ------------ MODAL ------------ */
 function openModal(it){
-  const liked=`liked_${it.id}`;
+  const likedKey=`liked_${it.id}`;
   const media = it.type==='image' && isImg(it.link)
-        ? `<img src="${it.link}" class="modal-media">`
-        : it.link?.includes('youtu')
-           ? `<iframe class="modal-media" src="https://www.youtube.com/embed/${it.link.split('v=')[1]?.slice(0,11)}" allowfullscreen></iframe>`
-           : `<a href="${it.link}" target="_blank">Open link</a>`;
+     ? `<img src="${it.link}" class="modal-media">`
+     : it.link?.includes('youtu')
+        ? `<iframe class="modal-media" src="https://www.youtube.com/embed/${it.link.split('v=')[1]?.slice(0,11)}" allowfullscreen></iframe>`
+        : `<a href="${it.link}" target="_blank">Open link</a>`;
 
   modalC.innerHTML = `
-      ${media}
-      <button class="like-btn ${localStorage.getItem(liked)?'liked':''}">
-        🔥 <span>${it.likes}</span>
-      </button>
-      <div id="cWrap"></div>`;
+    ${media}
+    <button class="like-btn ${localStorage.getItem(likedKey)?'liked':''}">
+      🔥 <span>${it.likes}</span>
+    </button>
+    <div id="cWrap"></div>`;
   const likeBtn = modalC.querySelector('.like-btn');
-  likeBtn.addEventListener('click',e=>{e.stopPropagation();like(it,likeBtn);});
+  likeBtn.addEventListener('click',e=>{ e.stopPropagation(); like(it,likeBtn); });
 
   mountComments(modalC.querySelector('#cWrap'), it.id);
   modal.showModal();
 }
 
-/* card */
+/* ------------ CARDS ------------ */
 function card(it){
   const el=document.createElement('article');
   el.className='card';
@@ -87,25 +89,27 @@ function card(it){
     <div class="inner">
       <h3>${it.title_en||'(untitled)'}</h3>
       <p>By ${
-       it.creator_slug ? `<a href="creator.html?slug=${it.creator_slug}">${it.creator_name}</a>`
-                       : (it.creator_name||'Unknown')}
-      </p>
+        it.creator_slug
+          ? `<a href="creator.html?slug=${it.creator_slug}">${it.creator_name}</a>`
+          : (it.creator_name||'Unknown')
+      }</p>
       <span class="badge">${it.type}</span>
       <button class="like-btn ${localStorage.getItem(`liked_${it.id}`)?'liked':''}">
         🔥 <span>${it.likes}</span>
       </button>
     </div>`;
   const likeBtn=el.querySelector('.like-btn');
-  likeBtn.addEventListener('click',e=>{e.stopPropagation();like(it,likeBtn);});
+  likeBtn.addEventListener('click',e=>{ e.stopPropagation(); like(it,likeBtn); });
   el.addEventListener('click',()=>openModal(it));
   return el;
 }
-function render(list){grid.innerHTML='';list.forEach(it=>grid.appendChild(card(it)));}
+function render(list){ grid.innerHTML=''; list.forEach(it=>grid.appendChild(card(it))); }
 function refresh(){
-  const kw=(q.value||'').toLowerCase(),t=ft.value,s=ss.value;
+  const kw=(q.value||'').toLowerCase(), t=ft.value, s=ss.value;
   let list=allItems.filter(it=>
-     (t==='All'||it.type===t)&&
-     ((it.title_en||'').toLowerCase().includes(kw)||(it.creator_name||'').toLowerCase().includes(kw)));
+    (t==='All'||it.type===t) &&
+    ((it.title_en||'').toLowerCase().includes(kw) ||
+     (it.creator_name||'').toLowerCase().includes(kw)));
   if(s==='Oldest') list=[...list].reverse();
   render(list);
 }
