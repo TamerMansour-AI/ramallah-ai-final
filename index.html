@@ -33,7 +33,7 @@
 <header class="navbar navbar-dark">
   <div class="navbar-container">
     <a class="logo" href="index.html">Ramallah.ai</a>
-    <button id="nav-hamburger" class="navbar-hamburger" aria-label="Menu">
+    <button id="nav-hamburger" class="navbar-hamburger" aria-label="Open navigation">
       <span></span><span></span><span></span>
     </button>
     <nav class="navbar-links" id="navbar-links">
@@ -65,7 +65,7 @@
     <h2>Success Stories</h2>
     <div class="story-carousel">
       <a class="story-card" href="story1.html">
-        <img loading="lazy" src="images/success/laila-work.png" alt="Still from Laila's animated short film">
+        <img loading="lazy" src="images/success/laila-work.png" alt="Still from Laila's animated short film" fetchpriority="high">
         <h3>Laila’s animated short</h3>
         <p>Created with Stable Diffusion & Runway.</p>
       </a>
@@ -110,7 +110,7 @@
     </form>
     <div id="thank-you-modal" class="thank-you-modal">
       <div class="modal-content">
-        <button id="close-modal-btn" class="modal-close" aria-label="Close">&times;</button>
+        <span class="modal-close" role="button" tabindex="0" aria-label="Close modal">×</span>
         <h3>Thank you!</h3>
         <p>Your submission was received.</p>
       </div>

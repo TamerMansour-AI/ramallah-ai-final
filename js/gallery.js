@@ -79,13 +79,13 @@ function openModal(it){
     else if(it.link?.includes('youtu'))
       media=`<iframe class="modal-media" src="https://www.youtube.com/embed/${ytId(it.link)}" allowfullscreen></iframe>`;
     else
-      media=`<a href="${it.link}" target="_blank">Open link</a>`;
+      media=`<a href="${it.link}" target="_blank" rel="noopener">Open link</a>`;
   }else if(it.type==='research' || /\.pdf(\?.*)?$/i.test(it.link||'')){
     media=`<iframe class="modal-media" src="${it.link}"></iframe>`;
   }else if(it.link?.includes('youtu')){
     media=`<iframe class="modal-media" src="https://www.youtube.com/embed/${ytId(it.link)}" allowfullscreen></iframe>`;
   }else{
-    media=`<a href="${it.link}" target="_blank">Open link</a>`;
+    media=`<a href="${it.link}" target="_blank" rel="noopener">Open link</a>`;
   }
 
   modalC.innerHTML = `

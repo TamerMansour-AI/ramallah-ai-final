@@ -136,16 +136,16 @@
     }
 
     const socials = [];
-    if (data.instagram) socials.push(`<a href="${data.instagram}" target="_blank" aria-label="Instagram">📷</a>`);
-    if (data.twitter) socials.push(`<a href="${data.twitter}" target="_blank" aria-label="Twitter">🐦</a>`);
-    if (data.youtube) socials.push(`<a href="${data.youtube}" target="_blank" aria-label="YouTube">▶️</a>`);
+    if (data.instagram) socials.push(`<a href="${data.instagram}" target="_blank" rel="noopener" aria-label="Instagram">📷</a>`);
+    if (data.twitter) socials.push(`<a href="${data.twitter}" target="_blank" rel="noopener" aria-label="Twitter">🐦</a>`);
+    if (data.youtube) socials.push(`<a href="${data.youtube}" target="_blank" rel="noopener" aria-label="YouTube">▶️</a>`);
     const socialsHtml = socials.length ? `<div class="creator-socials">${socials.join('')}</div>` : '';
 
     const bioText = data[bioField] || (isArabic ? 'لا تتوفر نبذة.' : 'No bio available.');
 
     container.innerHTML = `
       <div class="creator-details">
-        <img class="creator-photo" src="${data.avatar_url || 'images/creators/avatar.png'}"
+        <img class="creator-photo" loading="lazy" src="${data.avatar_url || 'images/creators/avatar.png'}"
              alt="${data.name}" onerror="this.src='images/creators/avatar.png';">
         <h1>${data.name}</h1>
         ${data.speciality ? `<h3>${data.speciality}</h3>` : ''}

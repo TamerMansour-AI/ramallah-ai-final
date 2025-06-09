@@ -95,3 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 5000);
   }
 });
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    document.body.classList.remove('modal-open');
+  }
+});

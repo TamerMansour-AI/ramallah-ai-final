@@ -30,7 +30,7 @@
 <header class="navbar navbar-dark">
   <div class="navbar-container">
     <a class="logo" href="index-ar.html">Ramallah.ai</a>
-    <button id="nav-hamburger" class="navbar-hamburger" aria-label="Menu">
+    <button id="nav-hamburger" class="navbar-hamburger" aria-label="Open navigation">
       <span></span><span></span><span></span>
     </button>
     <nav class="navbar-links" id="navbar-links">
@@ -62,7 +62,7 @@
     <h2>قصص نجاح</h2>
     <div class="story-carousel">
       <a class="story-card" href="story1-ar.html">
-        <img loading="lazy" src="images/success/laila-work.png" alt="لقطة من فيلم ليلى القصير">
+        <img loading="lazy" src="images/success/laila-work.png" alt="لقطة من فيلم ليلى القصير" fetchpriority="high">
         <h3>فيلم ليلى</h3>
         <p>باستخدام Stable Diffusion وRunway.</p>
       </a>
@@ -108,7 +108,7 @@
 
     <div id="thank-you-modal-ar" class="thank-you-modal">
       <div class="modal-content">
-        <button id="close-modal-btn-ar" class="modal-close" aria-label="Close">&times;</button>
+        <span class="modal-close" role="button" tabindex="0" aria-label="Close modal">×</span>
         <h3>شكراً لك!</h3>
         <p>تم استلام مشاركتك.</p>
       </div>
