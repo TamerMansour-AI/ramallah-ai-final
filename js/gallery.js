@@ -27,6 +27,8 @@ async function fetchData(){
     .range(currentPage*PAGE_SIZE, currentPage*PAGE_SIZE + PAGE_SIZE - 1)
     .order('created_at',{ascending:false});
 
+  console.log('Fetched', data?.length, 'items', data?.slice(0,3));
+
   currentPage++;
   if(error){ console.error(error); loading=false; return; }
 
@@ -135,6 +137,7 @@ function createCard(it){
   const likeBtn=el.querySelector('.like-btn');
   likeBtn.addEventListener('click',e=>{ e.stopPropagation(); like(it,likeBtn); });
   const img=el.querySelector('img');
+  img.src = it.link;
   img.addEventListener('load',()=>img.classList.remove('loading'));
   el.addEventListener('click',()=>openModal(it));
   return el;
