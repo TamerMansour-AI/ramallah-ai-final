@@ -23,7 +23,7 @@ async function fetchData(){
   const { data, error } = await supabase
     .from('submissions')
     .select('*')
-    .eq('status','approved')
+    .in('status', ['approved','published','ready'])
     .range(currentPage*PAGE_SIZE, currentPage*PAGE_SIZE + PAGE_SIZE - 1)
     .order('created_at',{ascending:false});
 
