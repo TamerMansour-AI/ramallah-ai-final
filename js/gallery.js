@@ -34,8 +34,12 @@ async function fetchData(){
   if(error){ console.error(error); loading=false; return; }
 
   // إزالة الـSkeleton واستبداله بالبطاقات الحقيقية
-  grid.querySelectorAll('.skeleton').forEach(el=>el.remove());
-  data.forEach(item => grid.appendChild(createCard(item)));
+  grid.querySelectorAll('.skeleton').forEach(el => el.style.display='none');
+  data.forEach(item => {
+    const card = createCard(item);
+    card.classList.remove('skeleton');
+    grid.appendChild(card);
+  });
 
   loading = false;
 }

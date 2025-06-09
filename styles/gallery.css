@@ -14,21 +14,29 @@
 .gallery-grid{column-count:3;column-gap:1.4rem}
 @media(max-width:900px){.gallery-grid{column-count:2}}
 @media(max-width:540px){.gallery-grid{column-count:1}}
-.gallery-card{break-inside:avoid; margin:0 0 1.4rem;}
-.gallery-card{transition:transform .3s var(--transition),box-shadow .3s var(--transition);}
+
+/* Masonry card base */
+.gallery-card{
+  display:inline-block;
+  width:100%;
+  position:relative;
+  margin:0 0 1.4rem;
+  background:#111;
+  border-radius:var(--radius);
+  overflow:hidden;
+  transition:transform .3s var(--transition),box-shadow .3s var(--transition);
+  break-inside:avoid;
+}
+.gallery-card img{
+  display:block;
+  width:100%;
+  height:auto;
+}
 .gallery-card:hover,
 .gallery-card:focus-within{
   transform:translateY(-6px) scale(1.02);
   box-shadow:0 8px 28px rgba(0,0,0,.12);
 }
-
-.gallery-card{
-  background:#1e1e1e;
-  border-radius:12px;
-  overflow:hidden;
-  box-shadow:0 2px 4px rgba(0,0,0,.4);
-}
-.gallery-card img{width:100%;display:block}
 .gallery-card img.loading{
   background:#333;
   filter:blur(5px);
@@ -53,11 +61,6 @@
 .likes{font-size:.8rem;margin-top:4px;color:#fcb400}
 
 /* nicer card look */
-.gallery-card img{
-  height: 200px;
-  object-fit: cover;
-  width:100%;
-}
 .gallery-card img[src$='.svg']{object-fit:contain}
 .gallery-card h3{margin:8px 0 4px;font-size:1rem}
 .gallery-card p{margin:0 0 4px;font-size:.85rem;color:#bbb}
