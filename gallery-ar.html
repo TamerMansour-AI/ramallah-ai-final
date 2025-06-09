@@ -2,32 +2,36 @@
 <head>
   <meta charset="utf-8">
   <title>المعرض – Ramallah.ai</title>
-  <link rel="icon" href="assets/favicon.ico" type="image/x-icon"><!-- favicon -->
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/gallery.css">
 </head>
 <body>
-  <header class="navbar navbar-dark">
-    <div class="navbar-container">
-      <a class="logo" href="index-ar.html">Ramallah.ai</a>
-      <nav class="navbar-links">
-        <a href="index-ar.html">الرئيسية</a><a href="gallery-ar.html" aria-current="page">المعرض</a>
-        <a href="about-ar.html">عن</a><a href="blog-ar.html">مدونة</a><a href="contact-ar.html">اتصل</a>
-      </nav>
-      <a href="gallery.html" class="lang-toggle">EN</a>
-    </div>
-  </header>
+<header class="navbar navbar-dark">
+  <div class="navbar-container">
+    <a class="logo" href="index-ar.html">Ramallah.ai</a>
+    <nav class="navbar-links">
+      <a href="index-ar.html">الرئيسية</a><a href="gallery-ar.html" aria-current="page">المعرض</a>
+      <a href="about-ar.html">عن</a><a href="blog-ar.html">مدوّنة</a><a href="contact-ar.html">اتّصل</a>
+    </nav>
+    <a href="gallery.html" class="lang-toggle">EN</a>
+  </div>
+</header>
 
-  <section class="controls">
-    <input id="searchInput" type="text" placeholder="ابحث…">
-    <select id="filterType"><option value="All">كل الأنواع</option><option value="image">صور</option><option value="music">موسيقى</option><option value="video">فيديو</option><option value="podcast">بودكاست</option><option value="research">أبحاث</option></select>
-    <select id="sortSelect"><option value="Newest">الأحدث</option><option value="Oldest">الأقدم</option></select>
-  </section>
+<section class="controls">
+  <input id="searchInput" type="text" placeholder="ابحث…">
+  <select id="filterType">
+    <option value="All">كل الأنواع</option><option value="image">صور</option>
+    <option value="music">موسيقى</option><option value="video">فيديو</option>
+    <option value="podcast">بودكاست</option><option value="research">أبحاث</option>
+  </select>
+  <select id="sortSelect"><option value="Newest">الأحدث</option><option value="Oldest">الأقدم</option></select>
+</section>
 
-  <section class="gallery-grid"></section>
+<section class="gallery-grid"></section>
 
-  <script src="js/env.js"></script>
-  <script type="module" src="js/gallery.js"></script>
+<script src="js/env.js"></script>
+<script type="module" src="js/gallery.js"></script>
 
-  <dialog id="previewModal"><button id="closeModal" class="close-btn">×</button><div id="modalContent"></div></dialog>
+<dialog id="previewModal"><button id="closeModal" class="close-btn">×</button><div id="modalContent"></div></dialog>
 </body></html>
