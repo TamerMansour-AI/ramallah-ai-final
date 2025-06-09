@@ -10,6 +10,7 @@
   --shadow:0 4px 24px rgba(0,0,0,.5);
   --transition:.4s cubic-bezier(.77,0,.18,1);
   --section-space:4rem;
+  --card-shadow-hover:0 8px 28px rgba(0,0,0,.12);
   --kufiyya:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgdmlld0JveD0iMCAwIDIwIDIwIj4KICA8cGF0aCBkPSJNMTAgMCBMMjAgMTAgTDEwIDIwIEwwIDEwIFoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIxIi8+Cjwvc3ZnPgo=");
 }
 
