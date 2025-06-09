@@ -17,15 +17,13 @@
 
 /* Masonry card base */
 .gallery-card{
-  display:inline-block;
+  display:inline-block;  /* يشغل عرض العمود */
   width:100%;
   position:relative;
   margin:0 0 1.4rem;
-  background:#111;
+  background:#111;       /* خلفية مؤقتة */
   border-radius:var(--radius);
   overflow:hidden;
-  transition:transform .3s var(--transition),box-shadow .3s var(--transition);
-  break-inside:avoid;
 }
 .gallery-card img{
   display:block;

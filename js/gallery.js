@@ -31,12 +31,20 @@ async function fetchData(){
   if(error){ console.error(error); loading=false; return; }
 
   // إزالة الـSkeleton واستبداله بالبطاقات الحقيقية
-  grid.querySelectorAll('.skeleton').forEach(el => el.style.display='none');
-  data.forEach(item => {
+  const skeletons = Array.from(grid.querySelectorAll('.skeleton'));
+
+  data.forEach((item, i) => {
     const card = createCard(item);
     card.classList.remove('skeleton');
-    grid.appendChild(card);
+    if (skeletons[i]) {
+      skeletons[i].replaceWith(card);
+    } else {
+      grid.appendChild(card);
+    }
   });
+
+  // بعد الاستبدال، احذف أي Skeleton متبقٍ
+  grid.querySelectorAll('.skeleton').forEach(el => el.remove());
 
   loading = false;
 }
