@@ -4,37 +4,40 @@ import { mountComments } from './comments.js';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let allItems=[];
-let currentList=[];
-let visible=0;
-const PAGE=20;
-const grid   = document.getElementById('gallery-grid');
+const PAGE_SIZE = 24;
+let currentPage = 0;
+let loading = false;
+
+const grid   = document.querySelector('.gallery-grid');
 const modal  = document.getElementById('previewModal');
 const modalC = document.getElementById('modalContent');
 document.getElementById('closeModal')?.addEventListener('click',()=>modal.close());
 modal.addEventListener('click',e=>{if(e.target===modal) modal.close();});
 modal.addEventListener('close', ()=>{ modalC.innerHTML=''; });   // clears stuck content
 
-const q=document.getElementById('searchInput'),
-      ft=document.getElementById('filterType'),
-      ss=document.getElementById('sortSelect');
-[q,ft,ss].forEach(el=>el?.addEventListener('input',refresh));
-
-document.addEventListener('DOMContentLoaded',loadGallery);
-
 /* ------------ DB LOAD ------------- */
-async function loadGallery(){
-  const { data:subs } = await supabase
+async function fetchData(){
+  if(loading) return;
+  loading = true;
+
+  // إنشاء هياكل Skeleton
+  [...Array(PAGE_SIZE)].forEach(()=>grid.appendChild(Object.assign(document.createElement('div'),{className:'skeleton'})));
+
+  const { data, error } = await supabase
     .from('submissions')
-    .select('id,title_en,type,link,creator_name,creator_slug,status,created_at')
-    .eq('status','approved');
+    .select('*')
+    .eq('status','approved')
+    .range(currentPage*PAGE_SIZE, currentPage*PAGE_SIZE + PAGE_SIZE - 1)
+    .order('created_at',{ascending:false});
 
-  const { data:lk } = await supabase.from('likes').select('slug,count');
-  const likeMap = Object.fromEntries((lk||[]).map(r=>[r.slug,r.count]));
+  currentPage++;
+  if(error){ console.error(error); loading=false; return; }
 
-  allItems=subs.map(x=>({...x,likes:likeMap[x.id]||0}))
-               .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
-  render(allItems);
+  // إزالة الـSkeleton واستبداله بالبطاقات الحقيقية
+  grid.querySelectorAll('.skeleton').forEach(el=>el.remove());
+  data.forEach(item => grid.appendChild(createCard(item)));
+
+  loading = false;
 }
 
 /* ------------ HELPERS ------------- */
@@ -99,9 +102,9 @@ function openModal(it){
 }
 
 /* ------------ CARDS ------------ */
-function card(it){
+function createCard(it){
   const el=document.createElement('article');
-  el.className='card';
+  el.className='gallery-card';
   el.innerHTML=`
     <img src="${thumb(it)}" loading="lazy" alt="${it.title_en||''}" class="loading">
     <div class="inner">
@@ -123,30 +126,20 @@ function card(it){
   el.addEventListener('click',()=>openModal(it));
   return el;
 }
-function render(list){
-  grid.innerHTML='';
-  currentList=list;
-  visible=0;
-  renderMore();
-}
-function renderMore(){
-  const slice=currentList.slice(visible,visible+PAGE);
-  slice.forEach(it=>grid.appendChild(card(it)));
-  visible+=slice.length;
-}
-function refresh(){
-  const kw=(q.value||'').toLowerCase(), t=ft.value, s=ss.value;
-  let list=allItems.filter(it=>
-    (t==='All'||it.type===t) &&
-    ((it.title_en||'').toLowerCase().includes(kw) ||
-     (it.creator_name||'').toLowerCase().includes(kw)));
-  if(s==='Oldest') list=[...list].reverse();
-  render(list);
-}
 
-window.addEventListener('scroll',()=>{
-  if(window.innerHeight+window.scrollY>document.body.offsetHeight-200){
-    renderMore();
+window.addEventListener('scroll', () => {
+  if(!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight - 800){
+    fetchData();
+  }
+});
+
+// استدعاء أولي
+fetchData();
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    document.querySelectorAll('.modal').forEach(m=>m.style.display='none');
+    document.body.classList.remove('modal-open');
   }
 });
 
