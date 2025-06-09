@@ -23,11 +23,10 @@ async function fetchData(){
   const { data, error } = await supabase
     .from('submissions')
     .select('*')
-    .in('status', ['approved','published','ready'])
     .range(currentPage*PAGE_SIZE, currentPage*PAGE_SIZE + PAGE_SIZE - 1)
-    .order('created_at',{ascending:false});
+    .order('created_at', { ascending:false });
 
-  console.log('Fetched', data?.length, 'items', data?.slice(0,3));
+  console.log('Fetched', data?.length);
 
   currentPage++;
   if(error){ console.error(error); loading=false; return; }
@@ -118,28 +117,36 @@ function openModal(it){
 
 /* ------------ CARDS ------------ */
 function createCard(it){
-  const el=document.createElement('article');
-  el.className='gallery-card';
-  el.innerHTML=`
-    <img src="${thumb(it)}" loading="lazy" alt="${it.title_en||''}" class="loading">
-    <div class="inner">
-      <h3>${it.title_en||'(untitled)'}</h3>
-      <p>By ${
-        it.creator_slug
-          ? `<a href="creator.html?slug=${it.creator_slug}">${it.creator_name}</a>`
-          : (it.creator_name||'Unknown')
-      }</p>
-      <span class="badge">${it.type}</span>
-      <button class="like-btn ${localStorage.getItem(`liked_${it.id}`)?'liked':''}">
-        🔥 <span>${it.likes}</span>
-      </button>
-    </div>`;
-  const likeBtn=el.querySelector('.like-btn');
-  likeBtn.addEventListener('click',e=>{ e.stopPropagation(); like(it,likeBtn); });
-  const img=el.querySelector('img');
-  img.src = it.link;
-  img.addEventListener('load',()=>img.classList.remove('loading'));
-  el.addEventListener('click',()=>openModal(it));
+  const el  = document.createElement('article');
+  el.className = 'gallery-card';
+
+  const img = document.createElement('img');
+  img.src  = it.link;
+  img.alt  = it.title_en || 'AI artwork';
+  img.loading = 'lazy';
+  img.classList.add('loading');
+
+  const inner = document.createElement('div');
+  inner.className = 'inner';
+  inner.innerHTML = `
+    <h3>${it.title_en||'(untitled)'}</h3>
+    <p>By ${
+      it.creator_slug
+        ? `<a href="creator.html?slug=${it.creator_slug}">${it.creator_name}</a>`
+        : (it.creator_name||'Unknown')
+    }</p>
+    <span class="badge">${it.type}</span>
+    <button class="like-btn ${localStorage.getItem(`liked_${it.id}`)?'liked':''}">
+      🔥 <span>${it.likes}</span>
+    </button>`;
+
+  el.appendChild(img);
+  el.appendChild(inner);
+
+  const likeBtn = inner.querySelector('.like-btn');
+  likeBtn.addEventListener('click', e => { e.stopPropagation(); like(it, likeBtn); });
+  img.addEventListener('load', () => img.classList.remove('loading'));
+  el.addEventListener('click', () => openModal(it));
   return el;
 }
 
