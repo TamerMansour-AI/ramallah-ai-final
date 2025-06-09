@@ -31,21 +31,9 @@ async function fetchData(){
   currentPage++;
   if(error){ console.error(error); loading=false; return; }
 
-  // إزالة الـSkeleton واستبداله بالبطاقات الحقيقية
-  const skeletons = Array.from(grid.querySelectorAll('.skeleton'));
-
-  data.forEach((item, i) => {
-    const card = createCard(item);
-    card.classList.remove('skeleton');
-    if (skeletons[i]) {
-      skeletons[i].replaceWith(card);
-    } else {
-      grid.appendChild(card);
-    }
-  });
-
-  // بعد الاستبدال، احذف أي Skeleton متبقٍ
-  grid.querySelectorAll('.skeleton').forEach(el => el.remove());
+  // استبدال الـSkeleton بالبطاقات الحقيقية
+  grid.querySelectorAll('.skeleton').forEach(el=>el.remove());
+  grid.append(...data.map(createCard));
 
   loading = false;
 }
@@ -125,6 +113,10 @@ function createCard(it){
   img.alt  = it.title_en || 'AI artwork';
   img.loading = 'lazy';
   img.classList.add('loading');
+
+  img.addEventListener('load',()=>{       // يحذف min-height عند انتهاء التحميل
+    el.style.minHeight = 'unset';
+  });
 
   const inner = document.createElement('div');
   inner.className = 'inner';
