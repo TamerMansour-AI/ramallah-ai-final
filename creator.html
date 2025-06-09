@@ -15,16 +15,15 @@
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="stylesheet" href="styles/gallery.css" />
 
-  <script src="js/env.js"></script>
+  <script type="module" src="js/env.js"></script>
+  <script type="module" src="js/navbar.js"></script>
 
   <!-- ✅ Meta Tags Injection Script -->
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    import { supabase } from './auth.js';
 
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('id');
-
-    const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 
     if (slug) {
       (async () => {
@@ -88,6 +87,8 @@
     <a href="blog.html">Blog</a>
     <a href="creator-profiles.html">Creators</a>
     <a href="contact.html">Contact</a>
+    <button id="login-btn" class="btn" aria-label="Sign in" data-i18n="login">Login</button>
+    <a id="profile-link" href="profile.html" hidden>Profile</a>
   </nav>
 </header>
 
@@ -103,9 +104,7 @@
 
 <!-- ✅ Creator Content Renderer + Like Logic -->
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-  const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  import { supabase, getUser } from './auth.js';
   let visitorIP = '';
   (async () => {
     try {
@@ -156,6 +155,7 @@
           <button id="like-btn" class="cta-btn">👍 Like</button>
           <span id="like-count">...</span>
         </div>
+        <button id="follow-btn" class="btn">Follow</button> <span id="f-count"></span>
 
         <div class="share-box">
           <div id="share-buttons" class="share-icons"></div>
@@ -169,7 +169,7 @@
 
     // Like logic
     const likeCountEl = document.getElementById('like-count');
-    const likeBtn = document.getElementById('like-btn');
+  const likeBtn = document.getElementById('like-btn');
 
     const { data: likeData } = await supabase
       .from('likes')
@@ -188,7 +188,7 @@
       likeBtn.title = 'Liked ❤️';
     }
 
-    likeBtn.addEventListener('click', async () => {
+  likeBtn.addEventListener('click', async () => {
       if (localStorage.getItem(baseKey) || localStorage.getItem(likedKey)) return;
 
       const { error: updateError } = await supabase
@@ -206,7 +206,27 @@
       } else {
         alert('Something went wrong.');
       }
-    });
+  });
+
+  // Follow logic
+  import { supabase as authClient, getUser } from './auth.js';
+  const followBtn = document.getElementById('follow-btn');
+  const fCount = document.getElementById('f-count');
+  async function refreshFollow(){
+    const { count } = await authClient
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+      .eq('creator_slug', slug);
+    fCount.textContent = `(${count})`;
+  }
+  refreshFollow();
+  followBtn.addEventListener('click', async ()=>{
+    const { data:{user} } = await getUser();
+    if(!user){ alert('Login first'); return; }
+    await authClient.from('follows').upsert({ follower_id:user.id, creator_slug:slug });
+    refreshFollow();
+    followBtn.textContent = 'Following ✓';
+  });
 
     // Share logic
     const shareContainer = document.getElementById('share-buttons');

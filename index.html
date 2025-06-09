@@ -21,10 +21,11 @@
   <link rel="icon" href="images/favicon.png" type="image/png" />
   
   <!-- ✅ أضف هذا السطر الجديد قبل أي سكربت آخر -->
-  <script src="js/env.js"></script>
-  
+  <script type="module" src="js/env.js"></script>
+
   <!-- موجود سابقًا -->
   <script defer src="js/main.js"></script>
+  <script type="module" src="js/navbar.js"></script>
 </head>
   
 
@@ -45,6 +46,8 @@
       <a href="index.html#submit">Submit</a>
       <a href="creator-profiles.html">Creators</a>
       <a href="contact.html">Contact</a>
+      <button id="login-btn" class="btn" aria-label="Sign in" data-i18n="login">Login</button>
+      <a id="profile-link" href="profile.html" hidden>Profile</a>
     </nav>
     <a href="index-ar.html" class="lang-toggle" lang="ar">العربية</a>
   </div>
