@@ -90,8 +90,7 @@ function initSubmitForms() {
     }
     form.reset();
 
-    const closeBtnId = lang === 'ar' ? 'close-modal-btn-ar' : 'close-modal-btn';
-    const closeBtn = document.getElementById(closeBtnId);
+    const closeBtn = modal?.querySelector('.modal-close');
     if (closeBtn) {
       closeBtn.onclick = () => {
         if (modal) modal.style.display = 'none';
