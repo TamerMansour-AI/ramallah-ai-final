@@ -17,13 +17,14 @@
 
 /* Masonry card base */
 .gallery-card{
-  display:inline-block;  /* يشغل عرض العمود */
+  display:block;                  /* كان inline-block */
   width:100%;
   position:relative;
   margin:0 0 1.4rem;
-  background:#111;       /* خلفية مؤقتة */
+  background:#111;
   border-radius:var(--radius);
   overflow:hidden;
+  min-height:220px;               /* ⬅️ ارتفاع مبدئي يجعل البطاقة مرئية */
 }
 .gallery-card img{
   display:block;
@@ -63,25 +64,13 @@
 .gallery-card h3{margin:8px 0 4px;font-size:1rem}
 .gallery-card p{margin:0 0 4px;font-size:.85rem;color:#bbb}
 .gallery-card .inner{padding:8px}
-/* dialog – hidden when not [open] */
+/* --- MODAL centering --- */
 #previewModal{
-  display:none;                     /* default (closed) */
   position:fixed;inset:0;
-  padding:0;border:none;background:transparent;
-  align-items:center;justify-content:center;
+  display:none;align-items:center;justify-content:center;
 }
-#previewModal[open]{               /* only when open attribute exists */
-  display:flex;
-  animation:fadeIn .3s ease;
-}
-#previewModal::backdrop{
-  background:rgba(0,0,0,.8);
-  animation:fadeIn .3s ease;
-}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal-media{
-  max-width:90vw;max-height:80vh;object-fit:contain
-}
+#previewModal[open]{display:flex;}
+.modal-media{max-width:90vw;max-height:80vh;object-fit:contain}
 #modalContent{
   background:#222;
   padding:1rem;
