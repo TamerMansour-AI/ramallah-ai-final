@@ -296,3 +296,13 @@ html[dir="rtl"] .share-icons{flex-direction:row-reverse}
 }
 
 .btn-primary:disabled{opacity:.4;cursor:not-allowed}
+
+/* centered modal base */
+.modal{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  max-width:90%;
+  max-height:90%;
+}
