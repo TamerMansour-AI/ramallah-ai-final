@@ -1,6 +1,4 @@
-import { SUPABASE_URL, SUPABASE_KEY } from './env.js';
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+import { supabase, getUser } from './auth.js';
 
 export async function mountComments(wrapper, submissionId){
   wrapper.insertAdjacentHTML('beforeend',`
@@ -41,11 +39,14 @@ export async function mountComments(wrapper, submissionId){
 
   formEl.addEventListener('submit', async e=>{
     e.preventDefault();
+    const { data:{user} } = await getUser();
+    if(!user){ alert('Please login first!'); return; }
+
     const fd = new FormData(formEl);
     const name = fd.get('name').toString().trim();
     const body = fd.get('body').toString().trim();
     if(!name||!body) return;
-    await supabase.from('comments').insert({ submission_id: submissionId, name, body });
+    await supabase.from('comments').insert({ submission_id: submissionId, name, body, user_id: user.id });
     formEl.reset();
     load();
   });

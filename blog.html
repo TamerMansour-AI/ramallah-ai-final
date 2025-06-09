@@ -12,12 +12,31 @@
   <meta property="og:url" content="https://ramallah.ai" />
               <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <link rel="stylesheet" href="styles/main.css">
+  <script type="module" src="js/env.js"></script>
   <script defer src="js/main.js"></script>
+  <script type="module" src="js/navbar.js"></script>
   <script defer src="js/blog.js"></script>
   <link rel="icon" href="images/favicon.png" type="image/png" />
   </head>
 <body>
-<header class="navbar navbar-dark"><div class="navbar-container"><a class="logo" href="index.html">Ramallah.ai</a><button id="nav-hamburger" class="navbar-hamburger" aria-label="Open navigation"><span></span><span></span><span></span></button><nav class="navbar-links" id="navbar-links"><a href="index.html">Home</a><a href="gallery.html">Gallery</a><a href="about.html">About</a><a href="blog.html" aria-current="page">Blog</a><a href="index.html#submit">Submit</a><a href="creator-profiles.html">Creators</a><a href="contact.html">Contact</a></nav><a href="blog-ar.html" class="lang-toggle" lang="ar">العربية</a></div></header>
+<header class="navbar navbar-dark">
+  <div class="navbar-container">
+    <a class="logo" href="index.html">Ramallah.ai</a>
+    <button id="nav-hamburger" class="navbar-hamburger" aria-label="Open navigation"><span></span><span></span><span></span></button>
+    <nav class="navbar-links" id="navbar-links">
+      <a href="index.html">Home</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="about.html">About</a>
+      <a href="blog.html" aria-current="page">Blog</a>
+      <a href="index.html#submit">Submit</a>
+      <a href="creator-profiles.html">Creators</a>
+      <a href="contact.html">Contact</a>
+      <button id="login-btn" class="btn" aria-label="Sign in" data-i18n="login">Login</button>
+      <a id="profile-link" href="profile.html" hidden>Profile</a>
+    </nav>
+    <a href="blog-ar.html" class="lang-toggle" lang="ar">العربية</a>
+  </div>
+</header>
 <main class="container">
   <h1>Ramallah.ai Blog</h1>
   <p class="blog-intro">AI &amp; Palestine: Creative stories, tutorials, behind-the-scenes journeys of creators using AI</p>

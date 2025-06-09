@@ -1,8 +1,5 @@
-import { SUPABASE_URL, SUPABASE_KEY } from './env.js';
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 import { mountComments } from './comments.js';
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+import { supabase, getUser } from './auth.js';
 
 const PAGE_SIZE = 24;
 let currentPage = 0;
@@ -57,14 +54,18 @@ function thumb(it){
 async function like(it,btn){
   const key=`liked_${it.id}`;
   if(localStorage.getItem(key)) return;
-  const { data } = await supabase
-     .from('likes')
-     .upsert({slug:it.id,count:it.likes+1},{onConflict:'slug'})
-     .select('count').single();
-  it.likes=data.count;
-  btn.querySelector('span').textContent=it.likes;
-  btn.classList.add('liked');
-  localStorage.setItem(key,'1');
+  const { data:{user} } = await getUser();
+  if(!user){ alert('Please login first!'); return; }
+
+  const { error } = await supabase
+    .from('likes')
+    .insert({ submission_id: it.id, user_id: user.id });
+  if(!error){
+    it.likes++;
+    btn.querySelector('span').textContent=it.likes;
+    btn.classList.add('liked');
+    localStorage.setItem(key,'1');
+  }
 }
 
 /* ------------ MODAL ------------ */

@@ -1,58 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
-  <title>Ramallah.ai – Profile</title>
-  <meta charset="UTF-8">
-  <meta name="description" content="Ramallah.ai is a creative platform for AI-generated art, blogs, podcasts, and more from Palestinian creators.">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8"><title>Your Profile – Ramallah.ai</title>
   <link rel="stylesheet" href="styles/main.css">
-  <script src="js/env.js"></script>
   <script type="module" src="js/profile.js"></script>
-  <link rel="icon" href="images/favicon.png" type="image/png" />
 </head>
-<body>
-  <header class="navbar navbar-dark">
-    <div class="navbar-container">
-      <a class="logo" href="index.html">Ramallah.ai</a>
-      <button id="nav-hamburger" class="navbar-hamburger" aria-label="Open navigation"><span></span><span></span><span></span></button>
-      <nav class="navbar-links" id="navbar-links">
-        <a href="index.html">Home</a>
-        <a href="gallery.html">Gallery</a>
-        <a href="about.html">About</a>
-        <a href="blog.html">Blog</a>
-        <a href="index.html#submit">Submit</a>
-        <a href="creator-profiles.html">Creators</a>
-        <a href="contact.html">Contact</a>
-      </nav>
-      <a href="index-ar.html" class="lang-toggle" lang="ar">العربية</a>
-    </div>
-  </header>
-
-  <main class="container" style="padding-top:2rem;">
-    <h1>Your Profile</h1>
-    <p>Logged in as <b id="user-email"></b></p>
-    <button id="logout-btn" class="cta-btn">Logout</button>
-    <h2>Update Info</h2>
-    <form id="profile-form" class="contact-form" style="max-width:400px;">
-      <label>Name
-        <input name="name">
-      </label>
-      <label>Avatar URL
-        <input name="avatar_url">
-      </label>
-      <label>Bio
-        <textarea name="bio" rows="4"></textarea>
-      </label>
-      <label>Slug
-        <input name="slug">
-      </label>
-      <button type="submit">Save</button>
-      <p id="save-feedback" class="feedback" aria-live="polite"></p>
-    </form>
-  </main>
-
-  <footer class="footer glass kufiyya-bg">
-    <small>© 2025 Ramallah.ai</small>
-  </footer>
-</body>
-</html>
+<body class="container">
+  <h1>Edit Profile</h1>
+  <form id="profile-form">
+    <label>Name <input name="full_name" required></label>
+    <label>Bio  <textarea name="bio" rows="3"></textarea></label>
+    <label>Avatar URL <input name="avatar_url"></label>
+    <button type="submit" class="btn">Save</button>
+  </form>
+</body></html>

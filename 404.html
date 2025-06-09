@@ -12,7 +12,9 @@
   <meta property="og:url" content="https://ramallah.ai" />
               <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <link rel="stylesheet" href="styles/main.css">
+  <script type="module" src="js/env.js"></script>
   <script defer src="js/main.js"></script>
+  <script type="module" src="js/navbar.js"></script>
   <link rel="icon" href="images/favicon.png" type="image/png" />
 </head>
 <body>
@@ -26,8 +28,10 @@
         <a href="about.html">About</a>
         <a href="blog.html">Blog</a>
         <a href="index.html#submit">Submit</a>
-        <a href="creator-profiles.html">Creators</a>
-        <a href="contact.html">Contact</a>
+       <a href="creator-profiles.html">Creators</a>
+       <a href="contact.html">Contact</a>
+        <button id="login-btn" class="btn" aria-label="Sign in" data-i18n="login">Login</button>
+        <a id="profile-link" href="profile.html" hidden>Profile</a>
       </nav>
       <a href="index-ar.html" class="lang-toggle" lang="ar">العربية</a>
     </div>
