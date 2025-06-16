@@ -20,7 +20,8 @@ The site highlights Palestinian creators using AI tools. Key sections include:
 
 1. Clone this repository.
 2. Copy `js/env.sample.js` to `js/env.js` and add your Supabase project
-   credentials (see below).
+   credentials (see below). In production, generate `js/env.js` automatically
+   from environment variables so secrets never live in version control.
 3. Optionally create a `.env` file from `.env.example` if you prefer to inject
    credentials during deployment.
 4. Serve the files locally with any static HTTP server for testing, e.g.
@@ -51,9 +52,10 @@ You only need a basic HTTP server to preview the site locally.
 ## Deploying the static site
 
 Upload everything in this folder to your hosting provider (Netlify, Vercel,
-GitHub Pages, etc.). Ensure that `js/env.js` is generated with your Supabase
-credentials during the deployment process so forms and the admin interface can
-connect to your database.
+GitHub Pages, etc.). As part of your deployment pipeline, create `js/env.js`
+using environment variables (or a secrets manager) and insert your Supabase
+credentials. The runtime scripts rely on this file to connect to your database,
+but it should never be committed to the repository.
 
 
 ## License
