@@ -35,7 +35,7 @@ function createCard (it) {
   el.className = 'gallery-card';
 
   const img = document.createElement('img');
-  img.src   = it.link;
+  img.src   = it.thumb || it.link;
   img.alt   = it.title_en || 'Artwork';
   img.loading = 'lazy';
   img.onload = () => { el.style.minHeight = 'unset'; };
@@ -47,7 +47,7 @@ function createCard (it) {
 
 function openModal (it) {
   modalC.innerHTML = `
-    <img src="${it.link}" class="modal-media" alt="">
+    <img src="${it.thumb || it.link}" class="modal-media" alt="">
     <button id="likeBtn" class="like-btn">🔥 <span>${it.likes}</span></button>
     <div id="cWrap"></div>`;
   mountComments(modalC.querySelector('#cWrap'), it.id);
