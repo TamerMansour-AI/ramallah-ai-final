@@ -3,6 +3,9 @@ import { mountComments }    from './comments.js';
 
 const PAGE_SIZE = 24;
 let page = 0, loading = false;
+const searchEl = document.getElementById('searchInput');
+const filterEl = document.getElementById('filterType');
+const sortEl   = document.getElementById('sortSelect');
 
 const grid   = document.querySelector('.gallery-grid');
 const modal  = document.getElementById('previewModal');
@@ -10,17 +13,43 @@ const modalC = document.getElementById('modalContent');
 document.getElementById('closeModal').onclick = () => modal.close();
 modal.onclick = e => { if (e.target === modal) modal.close(); };
 
+function resetAndFetch() {
+  page = 0;
+  grid.innerHTML = '';
+  fetchData();
+}
+
+if (searchEl) searchEl.addEventListener('input', () => { resetAndFetch(); });
+if (filterEl) filterEl.addEventListener('change', () => { resetAndFetch(); });
+if (sortEl)   sortEl.addEventListener('change', () => { resetAndFetch(); });
+
 async function fetchData () {
   if (loading) return; loading = true;
   [...Array(PAGE_SIZE)].forEach(() =>
     grid.appendChild(Object.assign(document.createElement('div'), { className:'skeleton' })));
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('submissions')
     .select('*')
-    .eq('status', 'approved')
+    .eq('status', 'approved');
+
+  if (filterEl && filterEl.value && filterEl.value !== 'All') {
+    query = query.eq('type', filterEl.value);
+  }
+
+  const term = searchEl && searchEl.value.trim();
+  if (term) {
+    const t = term.replace(/,/g, '');
+    query = query.or(
+      `title_en.ilike.%${t}%,title_ar.ilike.%${t}%,creator_name.ilike.%${t}%`
+    );
+  }
+
+  query = query
     .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
-    .order('created_at', { ascending:false });
+    .order('created_at', { ascending: sortEl && sortEl.value === 'Oldest' });
+
+  const { data, error } = await query;
 
   page++;
   grid.querySelectorAll('.skeleton').forEach(s => s.remove());
