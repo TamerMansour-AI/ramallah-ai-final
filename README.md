@@ -9,12 +9,16 @@ server‑side component—just upload the files to any static hosting service.
 The site highlights Palestinian creators using AI tools. Key sections include:
 
 - **`index.html`** – landing page with a submission form.
-- **`gallery.html`** – . dynamic gallery of approved works.
+- **`gallery.html`** – dynamic gallery of approved works with search, filter and sort controls.
 - **`creator-profiles.html`** – list of creators.
 - **`blog.html`** and **`about.html`** – informational pages.
 - **`contact.html`** – contact form backed by Supabase.
 - **`admin/admin.html`** – lightweight admin interface to approve submissions.
 - **`profile.html`** – edit your account details after logging in.
+
+The gallery page allows you to search by title or creator name, filter by
+submission type and sort by newest or oldest entries. Changing any of these
+controls triggers a new Supabase query so results update instantly.
 
 ## Basic setup
 
