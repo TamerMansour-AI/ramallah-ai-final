@@ -34,3 +34,8 @@
 .like-btn{background:none;border:none;cursor:pointer;color:#fcb400;
   font-size:.9rem;display:flex;align-items:center;gap:4px}
 .like-btn.liked{opacity:.5;pointer-events:none}
+
+.gallery-card img {
+  opacity: 0;
+  transition: opacity .4s ease;
+}
