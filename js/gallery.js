@@ -3,6 +3,7 @@ import { mountComments }    from './comments.js';
 
 const PAGE_SIZE = 24;
 let page = 0, loading = false;
+const sections = ['image', 'music', 'video', 'blog', 'article', 'book'];
 const searchEl = document.getElementById('searchInput');
 const filterEl = document.getElementById('filterType');
 const sortEl   = document.getElementById('sortSelect');
@@ -63,11 +64,20 @@ function createCard (it) {
   const el  = document.createElement('article');
   el.className = 'gallery-card';
 
+  let thumb = it.thumb;
+  if (thumb && !thumb.startsWith('http')) {
+    const { data } = supabase
+      .storage
+      .from('uploads')
+      .getPublicUrl(thumb);
+    thumb = data.publicUrl;
+  }
+
   const img = document.createElement('img');
-  img.src   = it.thumb || it.link;
+  img.src   = thumb || it.link;
   img.alt   = it.title_en || 'Artwork';
   img.loading = 'lazy';
-  img.onload = () => { el.style.minHeight = 'unset'; };
+  img.onload = () => { img.style.opacity = 1; el.style.minHeight = 'unset'; };
 
   el.appendChild(img);
   el.onclick = () => openModal(it);
