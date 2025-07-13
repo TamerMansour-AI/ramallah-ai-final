@@ -1,114 +1,117 @@
-import { supabase, getUser } from './auth.js';
-import { mountComments }    from './comments.js';
-
-const PAGE_SIZE = 24;
-let page = 0, loading = false;
-const sections = ['image', 'music', 'video', 'blog', 'article', 'book'];
-const searchEl = document.getElementById('searchInput');
-const filterEl = document.getElementById('filterType');
-const sortEl   = document.getElementById('sortSelect');
-
-const grid   = document.querySelector('.gallery-grid');
-const modal  = document.getElementById('previewModal');
-const modalC = document.getElementById('modalContent');
-document.getElementById('closeModal').onclick = () => modal.close();
-modal.onclick = e => { if (e.target === modal) modal.close(); };
-
-function resetAndFetch() {
-  page = 0;
-  grid.innerHTML = '';
-  fetchData();
-}
-
-if (searchEl) searchEl.addEventListener('input', () => { resetAndFetch(); });
-if (filterEl) filterEl.addEventListener('change', () => { resetAndFetch(); });
-if (sortEl)   sortEl.addEventListener('change', () => { resetAndFetch(); });
-
-async function fetchData () {
-  if (loading) return; loading = true;
-  [...Array(PAGE_SIZE)].forEach(() =>
-    grid.appendChild(Object.assign(document.createElement('div'), { className:'skeleton' })));
-
-  let query = supabase
-    .from('submissions')
-    .select('*')
-    .eq('status', 'approved');
-
-  if (filterEl && filterEl.value && filterEl.value !== 'All') {
-    query = query.eq('type', filterEl.value);
-  }
-
-  const term = searchEl && searchEl.value.trim();
-  if (term) {
-    const t = term.replace(/,/g, '');
-    query = query.or(
-      `title_en.ilike.%${t}%,title_ar.ilike.%${t}%,creator_name.ilike.%${t}%`
-    );
-  }
-
-  query = query
-    .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
-    .order('created_at', { ascending: sortEl && sortEl.value === 'Oldest' });
-
-  const { data, error } = await query;
-
-  page++;
-  grid.querySelectorAll('.skeleton').forEach(s => s.remove());
-  if (error) { console.error(error); loading = false; return; }
-
-  data.forEach(item => grid.appendChild(createCard(item)));
-  loading = false;
-}
-
-function createCard (it) {
-  const el  = document.createElement('article');
-  el.className = 'gallery-card';
-
-  let thumb = it.thumb;
-  if (thumb && !thumb.startsWith('http')) {
-    const { data } = supabase
-      .storage
-      .from('uploads')
-      .getPublicUrl(thumb);
-    thumb = data.publicUrl;
-  }
-
-  const img = document.createElement('img');
-  img.src   = thumb || it.link;
-  img.alt   = it.title_en || 'Artwork';
-  img.loading = 'lazy';
-  img.onload = () => { img.style.opacity = 1; el.style.minHeight = 'unset'; };
-
-  el.appendChild(img);
-  el.onclick = () => openModal(it);
-  return el;
-}
-
-function openModal (it) {
-  modalC.innerHTML = `
-    <img src="${it.thumb || it.link}" class="modal-media" alt="">
-    <button id="likeBtn" class="like-btn">🔥 <span>${it.likes}</span></button>
-    <div id="cWrap"></div>`;
-  mountComments(modalC.querySelector('#cWrap'), it.id);
-  modal.showModal();
-
-  document.getElementById('likeBtn').onclick = async () => {
-    const { data:{ user } } = await getUser();
-    if (!user) return alert('Please sign in');
-    const { error } = await supabase
-      .from('likes')
-      .insert({ submission_id: it.id, user_id: user.id });
-    if (!error) {
-      const span = document.querySelector('#likeBtn span');
-      span.textContent = Number(span.textContent) + 1;
-      document.getElementById('likeBtn').classList.add('liked');
-    }
-  };
-}
-
-window.addEventListener('scroll', () => {
-  if (!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight - 600)
-    fetchData();
-});
-
-fetchData();
+@@
+-const sections = ['image', 'music', 'video', 'blog', 'article', 'book'];
++const sections = ['image', 'music', 'video', 'blog', 'book'];
+@@ function createCard(it) {
+-  let thumb = it.thumb;
+-  if (thumb && !thumb.startsWith('http')) {
+-    const { data } = supabase.storage.from('uploads').getPublicUrl(thumb);
+-    thumb = data.publicUrl;
+-  }
++  let thumbUrl = '';
++  if (it.type === 'image') {
++    // Use the submission link directly for images
++    thumbUrl = it.link;
++  } else if (it.thumb) {
++    // Use provided thumbnail path (if any) for non-image types
++    thumbUrl = it.thumb;
++    if (thumbUrl && !thumbUrl.startsWith('http')) {
++      const { data } = supabase.storage.from('uploads').getPublicUrl(thumbUrl);
++      if (data.publicUrl) thumbUrl = data.publicUrl;
++    }
++  } else {
++    // Derive a placeholder for non-image types (e.g., YouTube video)
++    if (it.type === 'video' && it.link) {
++      const ytMatch = it.link.match(/(?:youtube\.com.*(?:\?|&)v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
++      if (ytMatch) {
++        thumbUrl = `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
++      }
++    }
++    if (!thumbUrl) {
++      thumbUrl = 'assets/placeholder.png'; // generic placeholder image
++    }
++  }
+-  img.src   = thumb || it.link;
++  img.src   = thumbUrl || it.link;
+@@ function openModal(it) {
+-  modalC.innerHTML = `
+-    <img src="${it.thumb || it.link}" class="modal-media" alt="">
+-    <button id="likeBtn" class="like-btn">🔥 <span>${it.likes}</span></button>
+-    <div id="cWrap"></div>`;
+-  mountComments(modalC.querySelector('#cWrap'), it.id);
+-  modal.showModal();
++  const title = it.title_en || it.title_ar || '';
++  const creator = it.creator_name || it.creator || '';
++  const desc = it.desc_en || it.desc_ar || '';
++  modalC.innerHTML = `
++    <img src="${it.thumb || it.link}" class="modal-media" alt="">
++    <div class="modal-info">
++      ${ title ? `<h3>${title}</h3>` : '' }
++      ${ creator ? `<p><em>by ${creator}</em></p>` : '' }
++      ${ desc ? `<p>${desc}</p>` : '' }
++    </div>
++    <button id="likeBtn" class="like-btn">🔥 <span>${it.likes}</span></button>
++    <div id="cWrap"></div>
++    <div class="share-box">
++      <div id="share-buttons" class="share-icons"></div>
++      <span id="share-status" style="font-size:0.9rem;color:gray;"></span>
++    </div>`;
++  mountComments(modalC.querySelector('#cWrap'), it.id);
++  modal.showModal();
++  // Initialize share buttons (mobile share API fallback)
++  const shareContainer = modalC.querySelector('#share-buttons');
++  const shareStatus = modalC.querySelector('#share-status');
++  const isArabic = document.documentElement.lang === 'ar';
++  const shareTitle = title ? `${title} – Ramallah.ai` : 'Ramallah.ai';
++  const shareText = isArabic
++    ? (title ? `شاهد "${it.title_ar || it.title_en}" ضمن منصة Ramallah.ai` 
++             : 'شارك هذا عبر Ramallah.ai')
++    : (title ? `Check out "${title}" on Ramallah.ai` 
++             : 'Check this out on Ramallah.ai');
++  const shareUrl = window.location.origin + (isArabic ? '/gallery-ar.html' : '/gallery.html');
++  if (navigator.share && window.innerWidth < 768) {
++    const btn = document.createElement('button');
++    btn.textContent = '🔗';
++    btn.title = isArabic ? 'مشاركة' : 'Share';
++    btn.addEventListener('click', () => {
++      navigator.share({ title: shareTitle, text: shareText, url: shareUrl });
++    });
++    shareContainer.appendChild(btn);
++  } else {
++    const openWin = (u) => window.open(u, '_blank');
++    // WhatsApp
++    const wa = document.createElement('button');
++    wa.textContent = '💬';
++    wa.title = 'WhatsApp';
++    wa.addEventListener('click', () =>
++      openWin(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`)
++    );
++    // Facebook
++    const fb = document.createElement('button');
++    fb.textContent = '📘';
++    fb.title = 'Facebook';
++    fb.addEventListener('click', () =>
++      openWin(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`)
++    );
++    // X (Twitter)
++    const tw = document.createElement('button');
++    tw.textContent = '🐦';
++    tw.title = 'X';
++    tw.addEventListener('click', () =>
++      openWin(`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`)
++    );
++    // Copy Link
++    const copyBtn = document.createElement('button');
++    copyBtn.textContent = '🔗';
++    copyBtn.title = isArabic ? 'نسخ الرابط' : 'Copy link';
++    copyBtn.addEventListener('click', async () => {
++      try {
++        await navigator.clipboard.writeText(shareUrl);
++        shareStatus.textContent = isArabic ? '📋 تم نسخ الرابط' : '📋 Link copied!';
++        setTimeout(() => (shareStatus.textContent = ''), 2000);
++      } catch {
++        shareStatus.textContent = isArabic ? '❌ لم يتم نسخ الرابط' : '❌ Failed to copy link.';
++      }
++    });
++    [wa, fb, tw, copyBtn].forEach(btn => shareContainer.appendChild(btn));
++  }
+@@ (Like button handler remains unchanged)
