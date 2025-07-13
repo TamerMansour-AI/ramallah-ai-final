@@ -38,4 +38,36 @@
 .gallery-card img {
   opacity: 0;
   transition: opacity .4s ease;
+
+/* Comments section styling */
+.c-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0.5rem 0;
 }
+.c-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #444;
+}
+.c-item strong {
+  display: block;
+}
+.c-item small {
+  color: #aaa;
+  margin-left: 0.5rem;
+}
+.c-item p {
+  margin: 0.2rem 0 0.5rem;
+}
+/* Modal info text (title/creator/description) */
+.modal-info h3 {
+  margin: 0.5rem 0 0.2rem;
+}
+.modal-info p {
+  margin: 0.2rem 0;
+}
+.modal-info em {
+  color: #ccc;
+}
+
+
