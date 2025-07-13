@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Admin – Review Submissions</title>
+  <meta name="description" content="A bilingual platform showcasing AI-powered creativity from Palestine. Join the movement: share your work, explore others, and celebrate tech + culture."
+  <meta name="keywords" content="AI, Palestine, Ramallah, Creativity, Art, Music, Blogs, Podcasts, Artificial Intelligence">
+  <meta name="author" content="Ramallah.ai">
+  <meta property="og:title" content="Ramallah.ai – AI Creativity from Palestine" />
+  <meta property="og:description" content="Explore a new wave of creativity in Palestine powered by AI." />
+  <meta property="og:image" content="https://ramallah.ai/images/social-preview.jpg" />
+  <meta property="og:url" content="https://ramallah.ai" />
+              <title>Ramallah.ai – AI Creativity from Palestine</title>
+  <link rel="icon" href="images/favicon.png" type="image/png" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="../styles/main.css">
   <script src="../js/env.js"></script>
@@ -10,79 +18,27 @@
 <body>
   <main class="container">
     <h1>📋 Pending Submissions</h1>
-    <table id="submissions-table" border="1" cellpadding="8" style="width:100%;margin-top:1rem;">
-      <thead>
-        <tr>
-          <th>Creator</th>
-          <th>Type</th>
-          <th>Title</th>
-          <th>Link</th>
-          <th>Description</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div id="login-box" class="glass" style="margin-top:1rem;padding:1rem;">
+      <input type="password" id="admin-password" placeholder="Password">
+      <button id="login-btn">Enter</button>
+    </div>
+    <div id="approval-panel" style="display:none;margin-top:1.5rem;">
+      <table id="submissions-table" class="glass" style="width:100%;">
+        <thead>
+          <tr>
+            <th>Creator</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Image</th>
+            <th>Description</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </main>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const tableBody = document.querySelector('#submissions-table tbody');
-
-    // 👇 هذه الحماية مستقبلًا عندما تفعل Supabase Auth (غير مفعلة الآن)
-    /*
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || user.email !== "admin@ramallah.ai") {
-      alert("Access denied!");
-      window.location.href = "/";
-    }
-    */
-
-    async function fetchPending() {
-      const { data, error } = await supabase
-        .from('submissions')
-        .select('*')
-        .eq('status', 'pending');
-
-      if (error) {
-        alert('❌ Failed to load submissions');
-        return;
-      }
-
-      tableBody.innerHTML = '';
-      data.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${row.creator_name || '-'}</td>
-          <td>${row.type}</td>
-          <td>${row.title_en || row.title_ar || '-'}</td>
-          <td><a href="${row.link}" target="_blank">🔗 View</a></td>
-          <td>${row.desc_en || row.desc_ar || '-'}</td>
-          <td><button data-id="${row.id}">Approve ✅</button></td>
-        `;
-        tableBody.appendChild(tr);
-      });
-    }
-
-    tableBody.addEventListener('click', async (e) => {
-      if (e.target.tagName === 'BUTTON') {
-        const id = e.target.dataset.id;
-        const { error } = await supabase
-          .from('submissions')
-          .update({ status: 'approved' })
-          .eq('id', id);
-
-        if (error) {
-          alert('❌ Failed to approve');
-        } else {
-          e.target.closest('tr').remove();
-        }
-      }
-    });
-
-    fetchPending();
-  </script>
+  <script type="module" src="admin.js"></script>
 </body>
 </html>

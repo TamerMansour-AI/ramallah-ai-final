@@ -2,21 +2,28 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Creator – Ramallah.ai</title>
+  <meta name="description" content="A bilingual platform showcasing AI-powered creativity from Palestine. Join the movement: share your work, explore others, and celebrate tech + culture."
+  <meta name="keywords" content="AI, Palestine, Ramallah, Creativity, Art, Music, Blogs, Podcasts, Artificial Intelligence">
+  <meta name="author" content="Ramallah.ai">
+  <meta property="og:title" content="Ramallah.ai – AI Creativity from Palestine" />
+  <meta property="og:description" content="Explore a new wave of creativity in Palestine powered by AI." />
+  <meta property="og:image" content="https://ramallah.ai/images/social-preview.jpg" />
+  <meta property="og:url" content="https://ramallah.ai" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ramallah.ai – الإبداع الفلسطيني بالذكاء الاصطناعي</title>
+  <link rel="icon" href="images/favicon.png" type="image/png" />
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="stylesheet" href="styles/gallery.css" />
 
   <script src="js/env.js"></script>
+  <script type="module" src="js/navbar.js"></script>
 
   <!-- ✅ Meta Tags Injection Script -->
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    import { supabase } from './auth.js';
 
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('id');
-
-    const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 
     if (slug) {
       (async () => {
@@ -72,7 +79,7 @@
 
 <body>
 
-<header class="main-header">
+<header class="main-header navbar-dark">
   <a href="index.html" class="logo">Ramallah.ai</a>
   <nav>
     <a href="index.html">Home</a>
@@ -80,6 +87,8 @@
     <a href="blog.html">Blog</a>
     <a href="creator-profiles.html">Creators</a>
     <a href="contact.html">Contact</a>
+    <button id="login-btn" class="btn" aria-label="Sign in" data-i18n="login">Login</button>
+    <a id="profile-link" href="profile.html" hidden>Profile</a>
   </nav>
 </header>
 
@@ -89,15 +98,13 @@
   </section>
 </main>
 
-<footer class="footer">
+<footer class="footer glass kufiyya-bg">
   <small>© 2025 Ramallah.ai</small>
 </footer>
 
 <!-- ✅ Creator Content Renderer + Like Logic -->
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-  const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  import { supabase, getUser } from './auth.js';
   const params = new URLSearchParams(window.location.search);
   const slug = params.get('id');
 
@@ -120,18 +127,28 @@
       return;
     }
 
+    const socials = [];
+    if (data.instagram) socials.push(`<a href="${data.instagram}" target="_blank" rel="noopener" aria-label="Instagram">📷</a>`);
+    if (data.twitter) socials.push(`<a href="${data.twitter}" target="_blank" rel="noopener" aria-label="Twitter">🐦</a>`);
+    if (data.youtube) socials.push(`<a href="${data.youtube}" target="_blank" rel="noopener" aria-label="YouTube">▶️</a>`);
+    const socialsHtml = socials.length ? `<div class="creator-socials">${socials.join('')}</div>` : '';
+
+    const bioText = data[bioField] || (isArabic ? 'لا تتوفر نبذة.' : 'No bio available.');
+
     container.innerHTML = `
       <div class="creator-details">
-        <img class="creator-photo" src="${data.avatar_url || 'images/creators/avatar.png'}"
+        <img class="creator-photo" loading="lazy" src="${data.avatar_url || 'images/creators/avatar.png'}"
              alt="${data.name}" onerror="this.src='images/creators/avatar.png';">
         <h1>${data.name}</h1>
         ${data.speciality ? `<h3>${data.speciality}</h3>` : ''}
-        <p>${data[bioField] || ''}</p>
+        <p>${bioText}</p>
+        ${socialsHtml}
 
         <div class="like-box">
           <button id="like-btn" class="cta-btn">👍 Like</button>
           <span id="like-count">...</span>
         </div>
+        <button id="follow-btn" class="btn">Follow</button> <span id="f-count"></span>
 
         <div class="share-box">
           <button id="share-btn" class="cta-btn">🔗 Share</button>
@@ -162,7 +179,7 @@
       likeBtn.textContent = '❤️ Liked';
     }
 
-    likeBtn.addEventListener('click', async () => {
+   likeBtn.addEventListener('click', async () => {
       if (localStorage.getItem(likedKey)) return;
 
       const { error: updateError } = await supabase
@@ -181,6 +198,25 @@
       }
     });
 
+    // Follow logic
+    const followBtn = document.getElementById('follow-btn');
+    const fCount = document.getElementById('f-count');
+    async function refreshFollow(){
+      const { count } = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('creator_slug', slug);
+      fCount.textContent = `(${count})`;
+    }
+    refreshFollow();
+    followBtn.addEventListener('click', async ()=>{
+      const { data:{user} } = await getUser();
+      if(!user){ alert('Login first'); return; }
+      await supabase.from('follows').upsert({ follower_id:user.id, creator_slug:slug });
+      refreshFollow();
+      followBtn.textContent = 'Following ✓';
+    });
+
     // Share logic
     const shareBtn = document.getElementById('share-btn');
     const shareStatus = document.getElementById('share-status');
@@ -191,28 +227,16 @@
     const shareUrl = window.location.href;
 
     shareBtn.addEventListener('click', async () => {
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: shareTitle,
-            text: shareText,
-            url: shareUrl
-          });
-          shareStatus.textContent = isArabic ? '✅ تم المشاركة' : '✅ Shared!';
-        } catch (err) {
-          shareStatus.textContent = isArabic ? '❌ فشل المشاركة' : '❌ Share canceled';
-        }
-      } else {
-        try {
-          await navigator.clipboard.writeText(shareUrl);
-          shareStatus.textContent = isArabic
-            ? '📋 تم نسخ الرابط'
-            : '📋 Link copied to clipboard!';
-        } catch {
-          shareStatus.textContent = isArabic
-            ? '❌ لم يتم نسخ الرابط'
-            : '❌ Failed to copy link.';
-        }
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        shareStatus.textContent = isArabic
+          ? '📋 تم نسخ الرابط'
+          : '📋 Link copied!';
+        setTimeout(() => (shareStatus.textContent = ''), 2000);
+      } catch {
+        shareStatus.textContent = isArabic
+          ? '❌ لم يتم نسخ الرابط'
+          : '❌ Failed to copy link.';
       }
     });
   })();

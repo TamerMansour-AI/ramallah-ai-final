@@ -1,36 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Ramallah.ai – AI creativity in Palestine</title>
+  <title>Ramallah.ai – AI Creativity from Palestine</title>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Ramallah.ai – Where AI meets creativity in Palestine. Share AI-powered images, music, videos, blogs and books.">
-  <meta property="og:title" content="Ramallah.ai – AI creativity in Palestine">
-  <meta property="og:description" content="Share AI-powered images, music, videos, blogs and books.">
-  <meta property="og:image" content="images/wa.link_lg02ac.png">
-  <meta property="og:url" content="https://ramallah.ai/">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta name="description" content="A bilingual platform showcasing AI-powered creativity from Palestine. Join the movement: share your work, explore others, and celebrate tech + culture."
+  <meta name="keywords" content="AI, Palestine, Ramallah, Creativity, Art, Music, Blogs, Podcasts, Artificial Intelligence">
+  <meta name="author" content="Ramallah.ai">
+  <meta property="og:title" content="Ramallah.ai – AI Creativity from Palestine" />
+  <meta property="og:description" content="Explore a new wave of creativity in Palestine powered by AI." />
+  <meta property="og:image" content="https://ramallah.ai/images/social-preview.jpg" />
+  <meta property="og:url" content="https://ramallah.ai" />
+  <link rel="canonical" href="https://ramallah.ai/">
+                          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+            <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Ramallah.ai – AI creativity in Palestine">
   <meta name="twitter:description" content="Share AI-powered images, music, videos, blogs and books.">
   <meta name="twitter:image" content="images/wa.link_lg02ac.png">
   
   <link rel="stylesheet" href="styles/main.css">
-  <link rel="icon" href="favicon.ico">
+  <link rel="icon" href="images/favicon.png" type="image/png" />
   
   <!-- ✅ أضف هذا السطر الجديد قبل أي سكربت آخر -->
   <script src="js/env.js"></script>
-  
+
   <!-- موجود سابقًا -->
   <script defer src="js/main.js"></script>
+  <script type="module" src="js/navbar.js"></script>
 </head>
   
 
 
 <body>
-<header class="navbar">
+<header class="navbar navbar-dark">
   <div class="navbar-container">
     <a class="logo" href="index.html">Ramallah.ai</a>
-    <button id="nav-hamburger" class="navbar-hamburger" aria-label="Menu">
+    <button id="nav-hamburger" class="navbar-hamburger" aria-label="Open navigation">
       <span></span><span></span><span></span>
     </button>
     <nav class="navbar-links" id="navbar-links">
@@ -38,17 +42,22 @@
       <a href="gallery.html">Gallery</a>
       <a href="about.html">About</a>
       <a href="blog.html">Blog</a>
+      <a href="success.html">Success</a>
       <a href="index.html#submit">Submit</a>
       <a href="creator-profiles.html">Creators</a>
       <a href="contact.html">Contact</a>
+      <button id="login-btn" class="btn" aria-label="Sign in" data-i18n="login">Login</button>
+      <a id="profile-link" href="profile.html" hidden>Profile</a>
     </nav>
     <a href="index-ar.html" class="lang-toggle" lang="ar">العربية</a>
   </div>
 </header>
 
 <main>
-  <section class="hero">
-    <div class="hero-content">
+  <section class="hero kufiyya-bg">
+    <!-- TODO: Upload hero-loop.mp4 to /assets after merge -->
+    <video class="hero-video" src="assets/hero-loop.mp4" autoplay muted loop playsinline></video>
+    <div class="hero-inner glass">
       <h1>Where AI meets creativity in Palestine</h1>
       <p class="subtitle">Share AI‑powered images, music, videos, blogs and books.</p>
       <a href="#submit" class="cta-btn">Join the movement</a>
@@ -58,16 +67,21 @@
   <section class="success-stories">
     <h2>Success Stories</h2>
     <div class="story-carousel">
-      <article class="story-card">
-        <img src="images/success/laila-work.png" alt="Still from Laila's animated short film">
+      <a class="story-card" href="story1.html">
+        <img loading="lazy" src="images/success/laila-work.png" alt="Still from Laila's animated short film" fetchpriority="high">
         <h3>Laila’s animated short</h3>
         <p>Created with Stable Diffusion & Runway.</p>
-      </article>
-      <article class="story-card">
-        <img src="images/success/rami-work.png" alt="Rami creating music with AI tools">
+      </a>
+      <a class="story-card" href="story2.html">
+        <img loading="lazy" src="images/success/rami-work.png" alt="Rami creating music with AI tools">
         <h3>Rami’s generative track</h3>
         <p>AI‑assisted composition in Ableton.</p>
-      </article>
+      </a>
+      <a class="story-card" href="story3.html">
+        <img loading="lazy" src="images/gallery/gallery-art.png" alt="Placeholder art">
+        <h3>Another inspiring project</h3>
+        <p>Exploring creative AI techniques.</p>
+      </a>
     </div>
   </section>
 
@@ -75,28 +89,31 @@
     <h2>Submit your work</h2>
     <p class="helper-note">🔗 Tip: If using Google Drive, set sharing to “Anyone with the link”.</p>
     <form id="ai-submit-form" action="https://formspree.io/f/xrbpvebk" method="POST">
-      <label>Name <input name="fullName" required></label>
-      <label>Type
-        <select name="workType" required>
+      <label for="fullName">Name</label>
+      <input id="fullName" name="fullName" required>
+      <label for="workType">Type</label>
+        <select id="workType" name="workType" required>
           <option>Image</option>
           <option>Music</option>
           <option>Video</option>
           <option>Blog</option>
           <option>Article</option>
           <option>Book</option>
+          <option>Podcast</option>
         </select>
-      </label>
-      <label>
-        Upload file (image/video/audio):
-        <input type="file" name="workFile" accept="image/*,video/*,audio/*">
-      </label>      
-      <label>Description <textarea name="description" rows="3" required></textarea></label>
-      <button class="cta-btn">Send</button>
+      <label for="workFile">Upload file (image/video/audio):</label>
+      <input id="workFile" type="file" name="workFile" accept="image/*,video/*,audio/*">
+      <label for="upload-link">or paste a link</label>
+      <input type="url" id="upload-link" name="workLink" placeholder="https://youtu.be/…" pattern="https?://.+" autocomplete="off">
+      <label for="description">Description</label>
+        <textarea id="description" name="description" rows="3" maxlength="500" required></textarea>
+        <div class="char-count">0/500</div>
+      <progress class="upload-progress" max="100" value="0" style="display:none"></progress>
+      <button class="cta-btn btn-primary" type="submit">Send</button>
     </form>
-    <p class="form-note">Demo‑only — no files stored.</p>
     <div id="thank-you-modal" class="thank-you-modal">
       <div class="modal-content">
-        <span id="close-modal-btn" class="modal-close">&times;</span>
+        <span class="modal-close" role="button" tabindex="0" aria-label="Close modal">×</span>
         <h3>Thank you!</h3>
         <p>Your submission was received.</p>
       </div>
@@ -104,79 +121,11 @@
   </section>
 </main>
 
-<footer class="footer">
+<footer class="footer glass kufiyya-bg">
   <small>©2025 Ramallah.ai</small>
 </footer>
 
-<!-- السكربت الداخلي كما هو، يبقى موجود -->
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('#ai-submit-form, #ai-submit-form-ar');
-    if (!form) return;
-  
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-  
-      const fileInput = form.workFile;
-      let uploadedURL = '';
-  
-      // إذا فيه ملف مرفوع
-      if (fileInput && fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const fileExt = file.name.split('.').pop();
-        const filePath = `${Date.now()}-${file.name}`;
-  
-        const { data, error: uploadError } = await supabase.storage
-          .from('uploads')
-          .upload(filePath, file, { cacheControl: '3600', upsert: false });
-  
-        if (uploadError) {
-          alert(lang === 'ar' ? 'فشل رفع الملف' : 'File upload failed');
-          return;
-        }
-  
-        const { data: publicURL } = supabase.storage
-          .from('uploads')
-          .getPublicUrl(filePath);
-  
-        uploadedURL = publicURL.publicUrl;
-      }
-  
-      const data = {
-        creator_name: form.fullName.value,
-        type: form.workType.value.toLowerCase(),
-        link: uploadedURL || form.workLink?.value || '',
-        title_en: lang === 'en' ? form.description.value : '',
-        title_ar: lang === 'ar' ? form.description.value : '',
-        desc_en: lang === 'en' ? form.description.value : '',
-        desc_ar: lang === 'ar' ? form.description.value : '',
-        status: 'pending'
-      };
-  
-      const { error } = await supabase.from('submissions').insert([data]);
-      if (error) {
-        alert(lang === 'ar' ? 'فشل الإرسال. حاول مجددًا.' : 'Submission failed. Please try again.');
-        console.error(error);
-        return;
-      }
-  
-      const modalId = lang === 'ar' ? 'thank-you-modal-ar' : 'thank-you-modal';
-      const modal = document.getElementById(modalId);
-      if (modal) modal.style.display = 'block';
-      form.reset();
-  
-      const closeBtnId = lang === 'ar' ? 'close-modal-btn-ar' : 'close-modal-btn';
-      const closeBtn = document.getElementById(closeBtnId);
-      if (closeBtn) {
-        closeBtn.onclick = () => { modal.style.display = 'none'; };
-      }
-    });
-  });
-  </script>
+<script type="module" src="js/submit.js"></script>
   
   
 

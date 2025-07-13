@@ -1,151 +1,114 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+import { supabase, getUser } from './auth.js';
+import { mountComments }    from './comments.js';
 
-// إعداد الاتصال بـ Supabase
-const supabase = createClient(
-  window.SUPABASE_URL,
-  window.SUPABASE_ANON_KEY
-);
+const PAGE_SIZE = 24;
+let page = 0, loading = false;
+const sections = ['image', 'music', 'video', 'blog', 'article', 'book'];
+const searchEl = document.getElementById('searchInput');
+const filterEl = document.getElementById('filterType');
+const sortEl   = document.getElementById('sortSelect');
 
-// الأقسام الظاهرة فى الـ HTML
-const sections = ['images', 'music', 'videos', 'blogs', 'books'];
+const grid   = document.querySelector('.gallery-grid');
+const modal  = document.getElementById('previewModal');
+const modalC = document.getElementById('modalContent');
+document.getElementById('closeModal').onclick = () => modal.close();
+modal.onclick = e => { if (e.target === modal) modal.close(); };
 
-/* mapping القسم → القيمة فى قاعدة البيانات */
-const sectionMap = {
-  images: 'image',
-  music: 'music',
-  videos: 'video',
-  blogs: 'blog',
-  books: 'book'
-};
+function resetAndFetch() {
+  page = 0;
+  grid.innerHTML = '';
+  fetchData();
+}
 
-let allItems = [];
+if (searchEl) searchEl.addEventListener('input', () => { resetAndFetch(); });
+if (filterEl) filterEl.addEventListener('change', () => { resetAndFetch(); });
+if (sortEl)   sortEl.addEventListener('change', () => { resetAndFetch(); });
 
-async function fetchData() {
-  const { data, error } = await supabase
+async function fetchData () {
+  if (loading) return; loading = true;
+  [...Array(PAGE_SIZE)].forEach(() =>
+    grid.appendChild(Object.assign(document.createElement('div'), { className:'skeleton' })));
+
+  let query = supabase
     .from('submissions')
     .select('*')
     .eq('status', 'approved');
 
-  if (error) {
-    console.error('❌ Error loading data:', error);
-    return;
+  if (filterEl && filterEl.value && filterEl.value !== 'All') {
+    query = query.eq('type', filterEl.value);
   }
 
-  // 🧹 تنظيف البيانات: فقط اللي عنده عنوان وصورة (أو thumb)
-  allItems = data.filter(item => {
-    const hasTitle = item.title || item.title_en || item.title_ar;
-    const hasImage = item.thumb || (item.type === 'image' && item.link);
-    return hasTitle && hasImage;
-  });
-
-  renderFiltered();
-}
-
-function renderFiltered() {
-  const searchValue =
-    document.getElementById('search-input')?.value?.toLowerCase() || '';
-
-  const selectedTypeRaw = document.getElementById('type-filter')?.value || '';
-  const selectedType =
-    selectedTypeRaw === 'images' ? 'image' : selectedTypeRaw;
-
-  sections.forEach((section) => {
-    const container = document.querySelector(`#${section} .gallery-grid`);
-    if (!container) return;
-    container.innerHTML = '';
-
-    const filtered = allItems.filter((item) => {
-      const matchesType = selectedType ? item.type === selectedType : true;
-      const matchesSearch =
-        (item.title_en || item.title_ar || '')
-          .toLowerCase()
-          .includes(searchValue) ||
-        (item.creator_name || '')
-          .toLowerCase()
-          .includes(searchValue);
-
-      const sectionMatch = item.type === sectionMap[section];
-      return sectionMatch && matchesType && matchesSearch;
-    });
-
-    filtered.forEach((item) => {
-      const imgSrc = item.type === 'image' ? item.link : item.thumb || '';
-
-      const card = document.createElement('div');
-      card.className = 'gallery-card show';
-
-      if (imgSrc) {
-        const img = document.createElement('img');
-        img.src = imgSrc;
-        img.alt = item.title_en || '';
-        img.loading = 'lazy';
-        img.className = 'clickable-image';
-        card.appendChild(img);
-      }
-
-      const creatorName = item.creator_name || item.creator;
-      if (creatorName) {
-        const metaDiv = document.createElement('div');
-        metaDiv.className = 'gallery-meta';
-        metaDiv.textContent = 'By ';
-        const b = document.createElement('b');
-        b.textContent = creatorName;
-        metaDiv.appendChild(b);
-        card.appendChild(metaDiv);
-      }
-
-      if (item.title) {
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'gallery-title';
-        titleDiv.textContent = item.title;
-        card.appendChild(titleDiv);
-      }
-
-      if (item.type) {
-        const badge = document.createElement('div');
-        badge.className = 'gallery-badge';
-        badge.textContent = item.type;
-        card.appendChild(badge);
-      }
-
-      const descDiv = document.createElement('div');
-      descDiv.className = 'gallery-desc';
-      descDiv.textContent = item.desc_en || item.desc_ar || '';
-      card.appendChild(descDiv);
-
-      if (item.link && item.type !== 'image') {
-        const link = document.createElement('a');
-        link.href = item.link;
-        link.target = '_blank';
-        link.textContent = '🔗 View Work';
-        card.appendChild(link);
-      }
-
-      container.appendChild(card);
-    });
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  fetchData();
-
-  const search = document.getElementById('search-input');
-  const filter = document.getElementById('type-filter');
-
-  if (search) search.addEventListener('input', renderFiltered);
-  if (filter) filter.addEventListener('change', renderFiltered);
-});
-
-document.addEventListener('click', function (e) {
-  if (e.target.classList.contains('clickable-image')) {
-    const overlay = document.createElement('div');
-    overlay.className = 'lightbox-overlay';
-    const img = document.createElement('img');
-    img.src = e.target.src;
-    overlay.appendChild(img);
-    document.body.appendChild(overlay);
-
-    overlay.addEventListener('click', () => overlay.remove());
+  const term = searchEl && searchEl.value.trim();
+  if (term) {
+    const t = term.replace(/,/g, '');
+    query = query.or(
+      `title_en.ilike.%${t}%,title_ar.ilike.%${t}%,creator_name.ilike.%${t}%`
+    );
   }
+
+  query = query
+    .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1)
+    .order('created_at', { ascending: sortEl && sortEl.value === 'Oldest' });
+
+  const { data, error } = await query;
+
+  page++;
+  grid.querySelectorAll('.skeleton').forEach(s => s.remove());
+  if (error) { console.error(error); loading = false; return; }
+
+  data.forEach(item => grid.appendChild(createCard(item)));
+  loading = false;
+}
+
+function createCard (it) {
+  const el  = document.createElement('article');
+  el.className = 'gallery-card';
+
+  let thumb = it.thumb;
+  if (thumb && !thumb.startsWith('http')) {
+    const { data } = supabase
+      .storage
+      .from('uploads')
+      .getPublicUrl(thumb);
+    thumb = data.publicUrl;
+  }
+
+  const img = document.createElement('img');
+  img.src   = thumb || it.link;
+  img.alt   = it.title_en || 'Artwork';
+  img.loading = 'lazy';
+  img.onload = () => { img.style.opacity = 1; el.style.minHeight = 'unset'; };
+
+  el.appendChild(img);
+  el.onclick = () => openModal(it);
+  return el;
+}
+
+function openModal (it) {
+  modalC.innerHTML = `
+    <img src="${it.thumb || it.link}" class="modal-media" alt="">
+    <button id="likeBtn" class="like-btn">🔥 <span>${it.likes}</span></button>
+    <div id="cWrap"></div>`;
+  mountComments(modalC.querySelector('#cWrap'), it.id);
+  modal.showModal();
+
+  document.getElementById('likeBtn').onclick = async () => {
+    const { data:{ user } } = await getUser();
+    if (!user) return alert('Please sign in');
+    const { error } = await supabase
+      .from('likes')
+      .insert({ submission_id: it.id, user_id: user.id });
+    if (!error) {
+      const span = document.querySelector('#likeBtn span');
+      span.textContent = Number(span.textContent) + 1;
+      document.getElementById('likeBtn').classList.add('liked');
+    }
+  };
+}
+
+window.addEventListener('scroll', () => {
+  if (!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight - 600)
+    fetchData();
 });
 
+fetchData();

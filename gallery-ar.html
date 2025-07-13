@@ -1,89 +1,37 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
+  <meta charset="utf-8">
   <title>المعرض – Ramallah.ai</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/gallery.css">
-  <link rel="icon" href="favicon.ico">
-  <script src="js/env.js"></script>
-  <script defer src="js/main.js"></script>
-  <script type="module" src="js/gallery.js"></script>
 </head>
-
 <body>
-<header class="navbar">
+<header class="navbar navbar-dark">
   <div class="navbar-container">
     <a class="logo" href="index-ar.html">Ramallah.ai</a>
-    <button id="nav-hamburger" class="navbar-hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
-    <nav class="navbar-links" id="navbar-links">
-      <a href="index-ar.html">الرئيسية</a>
-      <a href="gallery-ar.html" aria-current="page">المعرض</a>
-      <a href="about-ar.html">من نحن</a>
-      <a href="blog-ar.html">مدونة</a>
-      <a href="index-ar.html#submit">أرسل عملك</a>
-      <a href="creator-profiles-ar.html">المبدعون</a>
-      <a href="contact-ar.html">اتصل بنا</a>
+    <nav class="navbar-links">
+      <a href="index-ar.html">الرئيسية</a><a href="gallery-ar.html" aria-current="page">المعرض</a>
+      <a href="about-ar.html">عن</a><a href="blog-ar.html">مدوّنة</a><a href="contact-ar.html">اتّصل</a>
     </nav>
-    <a href="index.html" class="lang-toggle" lang="en">English</a>
+    <a href="gallery.html" class="lang-toggle">EN</a>
   </div>
 </header>
 
-<section class="gallery-intro kufiyya-bg">
-  <div class="container">
-    <p>استكشف إبداعات الذكاء الاصطناعي من المواهب الفلسطينية.</p>
-    <div class="filter-bar">
-      <input type="text" id="search-input" placeholder="بحث بالعنوان أو اسم المبدع">
-      <select id="type-filter">
-        <option value="">كل الأنواع</option>
-        <option value="images">صور</option>
-        <option value="music">موسيقى</option>
-        <option value="videos">فيديو</option>
-        <option value="blogs">مدونات</option>
-        <option value="books">كتب</option>
-      </select>
-    </div>
-  </div>
+<section class="controls">
+  <input id="searchInput" type="text" placeholder="ابحث…">
+  <select id="filterType">
+    <option value="All">كل الأنواع</option><option value="image">صور</option>
+    <option value="music">موسيقى</option><option value="video">فيديو</option>
+    <option value="podcast">بودكاست</option><option value="research">أبحاث</option>
+  </select>
+  <select id="sortSelect"><option value="Newest">الأحدث</option><option value="Oldest">الأقدم</option></select>
 </section>
 
-<section class="gallery-section" id="images">
-  <div class="container">
-    <h2>🖼️ الصور</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
+<section class="gallery-grid"></section>
 
-<section class="gallery-section" id="music">
-  <div class="container">
-    <h2>🎶 الموسيقى</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
+<script src="js/env.js"></script>
+<script type="module" src="js/gallery.js"></script>
 
-<section class="gallery-section" id="videos">
-  <div class="container">
-    <h2>🎥 الفيديو</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="blogs">
-  <div class="container">
-    <h2>📝 المدونات والمقالات</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<section class="gallery-section" id="books">
-  <div class="container">
-    <h2>📚 الكتب والقصص</h2>
-    <div class="gallery-grid"></div>
-  </div>
-</section>
-
-<footer class="footer">
-  <small>©2025 Ramallah.ai</small>
-</footer>
-</body>
-</html>
+<dialog id="previewModal"><button id="closeModal" class="close-btn">×</button><div id="modalContent"></div></dialog>
+</body></html>
