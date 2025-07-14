@@ -1,25 +1,26 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-export const supabase = createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+export const supabase = createClient(
+  window.SUPABASE_URL,
+  window.SUPABASE_ANON_KEY
+);
 
-// خزّن المستخدم أو أزِلْه عند تغيّر الجلسة
-supabase.auth.onAuthStateChange((_event, session) => {
-  if (session) {
-    localStorage.setItem('ai_user', JSON.stringify(session.user));
+// cache session ↔️ localStorage
+supabase.auth.onAuthStateChange((_evt, sess) => {
+  if (sess?.user) {
+    localStorage.setItem('ai_user', JSON.stringify(sess.user));
   } else {
     localStorage.removeItem('ai_user');
   }
 });
 
-// جلب بيانات المستخدم الحالي
-export const getUser = () => supabase.auth.getUser();
+export const getUser  = () => supabase.auth.getUser();
+export const signOut  = () => supabase.auth.signOut();
 
-// تسجيل الدخول عبر Google
-export const signIn = () =>
+/** Google OAuth → يرجع إلى الصفحة الرئيسية (والمسار مسجَّل في Google) */
+export const signIn   = () =>
   supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin + '/profile.html' }
+    /* NB: must be whitelisted فى Google Cloud & Supabase */
+    options: { redirectTo: `${window.location.origin}/` }
   });
-
-// تسجيل الخروج
-export const signOut = () => supabase.auth.signOut();

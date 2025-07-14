@@ -1,34 +1,29 @@
 import { getUser, signIn, signOut } from './auth.js';
 
-const btn    = document.getElementById('login-btn');
-const prof   = document.getElementById('profile-link');
-const burger = document.getElementById('nav-hamburger');
-const links  = document.getElementById('navbar-links');
+const btn     = document.getElementById('login-btn');
+const profile = document.getElementById('profile-link');
+const burger  = document.getElementById('nav-hamburger');
+const links   = document.getElementById('navbar-links');
 
-async function updateUI() {
+async function renderState() {
   const { data } = await getUser();
-  if (data.user) {
-    btn.textContent = 'Logout';
-    prof.hidden = false;
+  if (data?.user) {
+    btn.textContent   = 'Logout';
+    profile.hidden    = false;
   } else {
-    btn.textContent = 'Login';
-    prof.hidden = true;
+    btn.textContent   = 'Login';
+    profile.hidden    = true;
   }
 }
 
 btn?.addEventListener('click', async () => {
-  const { data } = await getUser();
-  if (data.user) {
-    await signOut();
-  } else {
-    await signIn();
-  }
-  updateUI();
+  (await getUser()).data.user ? await signOut() : await signIn();
+  renderState();
 });
 
 burger?.addEventListener('click', () => {
-  links.classList.toggle('open');
   burger.classList.toggle('open');
+  links.classList.toggle('open');
 });
 
-document.addEventListener('DOMContentLoaded', updateUI);
+document.addEventListener('DOMContentLoaded', renderState);
