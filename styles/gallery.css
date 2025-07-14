@@ -1,4 +1,82 @@
-.gallery-card{background:#fff;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.08);
-  padding:16px;opacity:0;transform:translateY(20px);transition:.4s}
-.gallery-card.show{opacity:1;transform:none}
-.gallery-card img{width:100%;max-height:220px;object-fit:cover;border-radius:8px;margin-bottom:12px}
+/* Gallery cards layout */
+.gallery-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  margin-top: 1.5rem;
+}
+.gallery-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 0.5rem;
+  transition: var(--transition);
+}
+.gallery-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 15px var(--accent);
+}
+.gallery-card img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+}
+.gallery-meta {
+  font-size: 0.85rem;
+  color: #ccc;
+  margin: 0.5rem 0 0;
+}
+.gallery-meta b {
+  color: var(--text);
+}
+.gallery-title {
+  font-weight: 600;
+  margin: 0.3rem 0 0;
+}
+
+/* Comments section styles */
+#comments {
+  margin-top: 2rem;
+}
+#comments h4 {
+  margin-bottom: 0.5rem;
+}
+.c-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+.c-item {
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  margin-bottom: 0.5rem;
+}
+.c-item strong {
+  font-weight: 600;
+}
+.c-item small {
+  font-size: 0.75rem;
+  color: #aaa;
+  margin-left: 0.5rem;
+}
+.c-item p {
+  margin: 0.2rem 0 0;
+}
+#cForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+#cForm input,
+#cForm textarea {
+  padding: 0.5rem;
+  border-radius: var(--radius);
+  border: 1px solid #ccc;
+  font-family: inherit;
+}
+#cForm button {
+  align-self: flex-start;
+  padding: 0.4rem 1rem;
+}
